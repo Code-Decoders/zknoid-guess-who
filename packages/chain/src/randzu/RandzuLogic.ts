@@ -13,7 +13,6 @@ import {
   Int64,
 } from 'o1js';
 import { MatchMaker } from '../engine/MatchMaker';
-import type { QueueListItem } from '../engine/MatchMaker';
 import { UInt64 as ProtoUInt64 } from '@proto-kit/library';
 import { Lobby } from '../engine/LobbyManager';
 
