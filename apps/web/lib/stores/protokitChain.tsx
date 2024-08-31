@@ -55,7 +55,7 @@ export const useProtokitChainStore = create<
       });
 
       const response = await fetch(
-        process.env.NEXT_PUBLIC_PROTOKIT_URL || 'http://localhost:8080/graphql',
+        process.env.NEXT_PUBLIC_PROTOKIT_URL || 'http://192.168.1.5:8080/graphql',
         {
           method: 'POST',
           headers: {
