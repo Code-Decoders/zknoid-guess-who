@@ -4,7 +4,7 @@ import SuperJSON from 'superjson';
 
 function getBaseUrl() {
   if (process.env.NODE_ENV === 'development')
-    return `http://192.168.1.5:${process.env.PORT ?? 3000}`;
+    return `http://localhost:${process.env.PORT ?? 3000}`;
   if (process.env.NEXT_PUBLIC_VERCEL_URL)
     return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
   return 'https://lottery.zknoid.io';
