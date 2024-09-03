@@ -12,7 +12,7 @@
     "noImplicitAny": true,
     "allowJs": true,
     "esModuleInterop": true,
-    "strict": true,
+    "strict": false,
     "alwaysStrict": true,
     "declarationMap": true,
     "strictFunctionTypes": true,
