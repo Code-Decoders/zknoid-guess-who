@@ -1,5 +1,3 @@
-jest.useFakeTimers()
-
 import { RuntimeModule, runtimeModule, state, runtimeMethod } from '@proto-kit/module';
 import {
   Bool,
@@ -14,8 +12,8 @@ import {
   Option,
 } from 'o1js';
 import { State, StateMap, assert } from '@proto-kit/protocol';
-import { MatchMaker } from 'src/engine/MatchMaker';
-import { Lobby } from 'src/engine/LobbyManager';
+import { MatchMaker } from 'src/engine';
+import { Lobby } from 'src/engine';
 import { ProtoUInt64 } from 'src';
 import { shuffle, uIntToNumber, updateCycle } from './utils';
 

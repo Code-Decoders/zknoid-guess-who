@@ -6,7 +6,7 @@
 module.exports = {
   // because we run tests from within ./packages/<package_name>/
   rootDir: './',
-  moduleDirectories: ['node_modules', 'src', 'test'],
+  moduleDirectories: ['node_modules', 'src', 'test', 'src/engine'],
   testPathIgnorePatterns: ['dist'],
   extensionsToTreatAsEsm: ['.ts'],
   testTimeout: 30_000,
