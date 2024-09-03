@@ -1,0 +1,42 @@
+import { AppChain, TestingAppChain } from '@proto-kit/sdk';
+import { Field, Int64, PrivateKey, PublicKey, UInt64 } from 'o1js';
+import { log } from '@proto-kit/common';
+import { Pickles } from 'o1js/dist/node/snarky';
+import { dummyBase64Proof } from 'o1js/dist/node/lib/proof_system';
+import { Balances, RandzuLogic } from '../src';
+
+log.setLevel('ERROR');
+
+export async function mockProof<I, O, P>(
+    publicOutput: O,
+    ProofType: new ({
+        proof,
+        publicInput,
+        publicOutput,
+        maxProofsVerified,
+    }: {
+        proof: unknown;
+        publicInput: I;
+        publicOutput: any;
+        maxProofsVerified: 0 | 2 | 1;
+    }) => P,
+    publicInput: I,
+): Promise<P> {
+    const [, proof] = Pickles.proofOfBase64(await dummyBase64Proof(), 2);
+    return new ProofType({
+        proof: proof,
+        maxProofsVerified: 2,
+        publicInput,
+        publicOutput,
+    });
+}
+
+describe("Guess Who Chain Test", () => {
+    it.skip('Log proof', async () => {
+        console.log(await dummyBase64Proof());
+    });
+
+    it("Two players basic case", () => {
+        
+    })
+})

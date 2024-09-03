@@ -1,4 +1,4 @@
-import { RuntimeModule, runtimeModule } from '@proto-kit/module';
+import { RuntimeModule, runtimeModule, state, runtimeMethod } from '@proto-kit/module';
 import {
   Bool,
   Field,
@@ -11,8 +11,6 @@ import {
   CircuitString,
   Option,
 } from 'o1js';
-
-import { state, runtimeMethod } from '@proto-kit/module';
 import { State, StateMap, assert } from '@proto-kit/protocol';
 import { MatchMaker } from 'src/engine';
 import { Lobby } from 'src/engine';
@@ -273,9 +271,18 @@ export class GuessWhoGame extends MatchMaker {
     lastCycle.moves = Provable.Array(UInt64, GW_CHAR_COUNT).fromValue([...lastCycle.moves, ...newMoves]);
 
     game.value.cycles[lastCycleIndex] = lastCycle;
-    await this.games.set(gameId, game.value);
 
+    game.value.currentMoveUser = Provable.if(
+      game.value.currentMoveUser.equals(game.value.player1),
+      game.value.player2,
+      game.value.player1,
+    );
+
+    game.value.lastMoveBlockHeight = this.network.block.height;
+
+    await this.games.set(gameId, game.value);
     this.checkWin(gameId);
+
   }
 
   private async checkWin(gameId: UInt64) {
@@ -286,24 +293,68 @@ export class GuessWhoGame extends MatchMaker {
     const player2Remaining = game.value.player2Board.filter(val => !val.isCancelled);
     const player2Picked = game.value.player2Board.find((val) => val.isPicked)
 
+    const winProposed = Bool.or(
+      player1Remaining.length == 1,
+      player2Remaining.length == 1
+    )
+
     if (player1Remaining.length == 1) {
-      if (player1Remaining[0].id == player2Picked!.id) {
-        game.value.winner = game.value.player1;
-      } else {
-        game.value.winner = game.value.player2;
-      }
+
+      game.value.winner = Provable.if(
+        player1Remaining[0].id.equals(player2Picked!.id),
+        game.value.player1,
+        game.value.player2
+      )
+
+      // if (player1Remaining[0].id == player2Picked!.id) {
+      //   game.value.winner = game.value.player1;
+      // } else {
+      //   game.value.winner = game.value.player2;
+      // }
     } else if (player2Remaining.length == 1) {
-      if (player2Remaining[0].id == player1Picked!.id) {
-        game.value.winner = game.value.player2;
-      } else {
-        game.value.winner = game.value.player1;
-      }
+      game.value.winner = Provable.if(
+        player2Remaining[0].id.equals(player1Picked!.id),
+        game.value.player2,
+        game.value.player1
+      )
+
+      // if (player2Remaining[0].id == player1Picked!.id) {
+      //   game.value.winner = game.value.player2;
+      // } else {
+      //   game.value.winner = game.value.player1;
+      // }
     }
+
+    const winnerShare = ProtoUInt64.from(
+      Provable.if<ProtoUInt64>(
+        winProposed,
+        ProtoUInt64,
+        ProtoUInt64.from(1),
+        ProtoUInt64.from(0),
+      ),
+    );
+
+    await this.acquireFunds(
+      gameId,
+      game.value.winner,
+      PublicKey.empty(),
+      winnerShare,
+      ProtoUInt64.from(0),
+      ProtoUInt64.from(1),
+    );
+
+    await this.activeGameId.set(
+      Provable.if(winProposed, game.value.player2, PublicKey.empty()),
+      UInt64.from(0),
+    );
+    await this.activeGameId.set(
+      Provable.if(winProposed, game.value.player1, PublicKey.empty()),
+      UInt64.from(0),
+    );
+
     await this.games.set(gameId, game.value);
-    // if (player1Remaining === 1 || player2Remaining === 1) {
-    //   game.value.winner = sender;
-    //   await this.games.set(gameId, game.value);
-    // }
+
+    await this._onLobbyEnd(gameId, winProposed);
   }
 
 }
