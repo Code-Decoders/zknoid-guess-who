@@ -1,0 +1,296 @@
+
+> starter-kit@ test /home/astar/Code/web/zknoid
+> turbo run test
+
+• Packages in scope: eslint-config-custom, tsconfig, web, zknoid-chain-dev
+• Running test in 4 packages
+• Remote caching disabled
+zknoid-chain-dev:test: cache miss, executing eeef66981173877a
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test: > zknoid-chain-dev@1.4.5 test /home/astar/Code/web/zknoid/packages/chain
+zknoid-chain-dev:test: > node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads ./node_modules/jest/bin/jest.js
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test: FAIL test/CreateBricks.test.ts
+zknoid-chain-dev:test:   ● Test suite failed to run
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [96mtest/CreateBricks.test.ts[0m:[93m13[0m:[93m34[0m - [91merror[0m[90m TS2307: [0mCannot find module 'o1js/dist/node/lib/proof_system' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m13[0m import { dummyBase64Proof } from 'o1js/dist/node/lib/proof_system';
+zknoid-chain-dev:test:     [7m  [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/CreateBricks.test.ts[0m:[93m15[0m:[93m3[0m - [91merror[0m[90m TS2305: [0mModule '"../src/index"' has no exported member 'GameHub'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m15[0m   GameHub,
+zknoid-chain-dev:test:     [7m  [0m [91m  ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/CreateBricks.test.ts[0m:[93m30[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/ArkanoidGameHub' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m30[0m } from '../src/ArkanoidGameHub';
+zknoid-chain-dev:test:     [7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/CreateBricks.test.ts[0m:[93m31[0m:[93m49[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/GameContext' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m31[0m import { GameContext, createBricksBySeed } from '../src/GameContext';
+zknoid-chain-dev:test:     [7m  [0m [91m                                                ~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/CreateBricks.test.ts[0m:[93m70[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'GameHub' does not exist in type 'TypedClass<RuntimeModule<unknown>>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m70[0m         GameHub,
+zknoid-chain-dev:test:     [7m  [0m [91m        ~~~~~~~[0m
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:       [96m../../node_modules/.pnpm/@proto-kit+common@0.1.1-develop.833_o1js@1.6.0_tsyringe@4.8.0/node_modules/@proto-kit/common/dist/config/ModuleContainer.d.ts[0m:[93m22[0m:[93m5[0m
+zknoid-chain-dev:test:         [7m22[0m     [name: string]: ModuleType;
+zknoid-chain-dev:test:         [7m  [0m [96m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:         The expected type comes from this index signature.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test: FAIL test/Matchmaker.test.ts
+zknoid-chain-dev:test:   ● Test suite failed to run
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m76[0m:[93m62[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m76[0m       let tx = await appChain.transaction(account.publicKey, () => {
+zknoid-chain-dev:test:     [7m  [0m [91m                                                             ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m89[0m:[93m58[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m89[0m     let tx = await appChain.transaction(alice.publicKey, () => {
+zknoid-chain-dev:test:     [7m  [0m [91m                                                         ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m103[0m:[93m59[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m103[0m       let tx = await appChain.transaction(user.publicKey, () => {
+zknoid-chain-dev:test:     [7m   [0m [91m                                                          ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m104[0m:[93m26[0m - [91merror[0m[90m TS2554: [0mExpected 5 arguments, but got 0.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m104[0m         let lobby = game.createLobby();
+zknoid-chain-dev:test:     [7m   [0m [91m                         ~~~~~~~~~~~[0m
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:       [96msrc/engine/LobbyManager.ts[0m:[93m225[0m:[93m5[0m
+zknoid-chain-dev:test:         [7m225[0m     name: CircuitString,
+zknoid-chain-dev:test:         [7m   [0m [96m    ~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:         An argument for 'name' was not provided.
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m118[0m:[93m59[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m118[0m       let tx = await appChain.transaction(user.publicKey, () => {
+zknoid-chain-dev:test:     [7m   [0m [91m                                                          ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m132[0m:[93m59[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m132[0m       let tx = await appChain.transaction(user.publicKey, () => {
+zknoid-chain-dev:test:     [7m   [0m [91m                                                          ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m145[0m:[93m59[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m145[0m       let tx = await appChain.transaction(user.publicKey, () => {
+zknoid-chain-dev:test:     [7m   [0m [91m                                                          ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m163[0m:[93m59[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m163[0m       let tx = await appChain.transaction(user.publicKey, () => {
+zknoid-chain-dev:test:     [7m   [0m [91m                                                          ~~~~~~~[0m
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test: FAIL test/GameHub.test.ts
+zknoid-chain-dev:test:   ● Test suite failed to run
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m13[0m:[93m34[0m - [91merror[0m[90m TS2307: [0mCannot find module 'o1js/dist/node/lib/proof_system' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m13[0m import { dummyBase64Proof } from 'o1js/dist/node/lib/proof_system';
+zknoid-chain-dev:test:     [7m  [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m31[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/ArkanoidGameHub' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m31[0m } from '../src/ArkanoidGameHub';
+zknoid-chain-dev:test:     [7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m32[0m:[93m29[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/GameContext' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m32[0m import { GameContext } from '../src/GameContext';
+zknoid-chain-dev:test:     [7m  [0m [91m                            ~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m33[0m:[93m26[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/balances' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m33[0m import { Balances } from '../src/balances';
+zknoid-chain-dev:test:     [7m  [0m [91m                         ~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m73[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'ArkanoidGameHub' does not exist in type 'TypedClass<RuntimeModule<unknown>>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m73[0m         ArkanoidGameHub,
+zknoid-chain-dev:test:     [7m  [0m [91m        ~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:       [96m../../node_modules/.pnpm/@proto-kit+common@0.1.1-develop.833_o1js@1.6.0_tsyringe@4.8.0/node_modules/@proto-kit/common/dist/config/ModuleContainer.d.ts[0m:[93m22[0m:[93m5[0m
+zknoid-chain-dev:test:         [7m22[0m     [name: string]: ModuleType;
+zknoid-chain-dev:test:         [7m  [0m [96m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:         The expected type comes from this index signature.
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m94[0m:[93m52[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m94[0m       const tx = await appChain.transaction(alice, () => {
+zknoid-chain-dev:test:     [7m  [0m [91m                                                   ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m95[0m:[93m17[0m - [91merror[0m[90m TS2339: [0mProperty 'createCompetition' does not exist on type 'RuntimeModule<unknown>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m95[0m         gameHub.createCompetition(competition);
+zknoid-chain-dev:test:     [7m  [0m [91m                ~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m138[0m:[93m7[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type 'MapGenerationProof'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m138[0m       mapGenerationProof,
+zknoid-chain-dev:test:     [7m   [0m [91m      ~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m147[0m:[93m51[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m147[0m     const tx1 = await appChain.transaction(alice, () => {
+zknoid-chain-dev:test:     [7m   [0m [91m                                                  ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m148[0m:[93m15[0m - [91merror[0m[90m TS2339: [0mProperty 'addGameResult' does not exist on type 'RuntimeModule<unknown>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m148[0m       gameHub.addGameResult(UInt64.from(0), gameRecordProof);
+zknoid-chain-dev:test:     [7m   [0m [91m              ~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m154[0m:[93m53[0m - [91merror[0m[90m TS2339: [0mProperty 'lastSeed' does not exist on type 'ModuleQuery<RuntimeModule<unknown>>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m154[0m       (await appChain.query.runtime.ArkanoidGameHub.lastSeed.get()) ??
+zknoid-chain-dev:test:     [7m   [0m [91m                                                    ~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m163[0m:[93m52[0m - [91merror[0m[90m TS2339: [0mProperty 'gameRecords' does not exist on type 'ModuleQuery<RuntimeModule<unknown>>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m163[0m       await appChain.query.runtime.ArkanoidGameHub.gameRecords.get(
+zknoid-chain-dev:test:     [7m   [0m [91m                                                   ~~~~~~~~~~~[0m
+zknoid-chain-dev:test: 
+
+> starter-kit@ test /home/astar/Code/web/zknoid
+> turbo run test
+
+• Packages in scope: eslint-config-custom, tsconfig, web, zknoid-chain-dev
+• Running test in 4 packages
+• Remote caching disabled
+zknoid-chain-dev:test: cache miss, executing eeef66981173877a
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test: > zknoid-chain-dev@1.4.5 test /home/astar/Code/web/zknoid/packages/chain
+zknoid-chain-dev:test: > node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads ./node_modules/jest/bin/jest.js
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test: FAIL test/CreateBricks.test.ts
+zknoid-chain-dev:test:   ● Test suite failed to run
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [96mtest/CreateBricks.test.ts[0m:[93m13[0m:[93m34[0m - [91merror[0m[90m TS2307: [0mCannot find module 'o1js/dist/node/lib/proof_system' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m13[0m import { dummyBase64Proof } from 'o1js/dist/node/lib/proof_system';
+zknoid-chain-dev:test:     [7m  [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/CreateBricks.test.ts[0m:[93m15[0m:[93m3[0m - [91merror[0m[90m TS2305: [0mModule '"../src/index"' has no exported member 'GameHub'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m15[0m   GameHub,
+zknoid-chain-dev:test:     [7m  [0m [91m  ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/CreateBricks.test.ts[0m:[93m30[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/ArkanoidGameHub' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m30[0m } from '../src/ArkanoidGameHub';
+zknoid-chain-dev:test:     [7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/CreateBricks.test.ts[0m:[93m31[0m:[93m49[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/GameContext' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m31[0m import { GameContext, createBricksBySeed } from '../src/GameContext';
+zknoid-chain-dev:test:     [7m  [0m [91m                                                ~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/CreateBricks.test.ts[0m:[93m70[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'GameHub' does not exist in type 'TypedClass<RuntimeModule<unknown>>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m70[0m         GameHub,
+zknoid-chain-dev:test:     [7m  [0m [91m        ~~~~~~~[0m
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:       [96m../../node_modules/.pnpm/@proto-kit+common@0.1.1-develop.833_o1js@1.6.0_tsyringe@4.8.0/node_modules/@proto-kit/common/dist/config/ModuleContainer.d.ts[0m:[93m22[0m:[93m5[0m
+zknoid-chain-dev:test:         [7m22[0m     [name: string]: ModuleType;
+zknoid-chain-dev:test:         [7m  [0m [96m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:         The expected type comes from this index signature.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test: FAIL test/Matchmaker.test.ts
+zknoid-chain-dev:test:   ● Test suite failed to run
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m76[0m:[93m62[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m76[0m       let tx = await appChain.transaction(account.publicKey, () => {
+zknoid-chain-dev:test:     [7m  [0m [91m                                                             ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m89[0m:[93m58[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m89[0m     let tx = await appChain.transaction(alice.publicKey, () => {
+zknoid-chain-dev:test:     [7m  [0m [91m                                                         ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m103[0m:[93m59[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m103[0m       let tx = await appChain.transaction(user.publicKey, () => {
+zknoid-chain-dev:test:     [7m   [0m [91m                                                          ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m104[0m:[93m26[0m - [91merror[0m[90m TS2554: [0mExpected 5 arguments, but got 0.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m104[0m         let lobby = game.createLobby();
+zknoid-chain-dev:test:     [7m   [0m [91m                         ~~~~~~~~~~~[0m
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:       [96msrc/engine/LobbyManager.ts[0m:[93m225[0m:[93m5[0m
+zknoid-chain-dev:test:         [7m225[0m     name: CircuitString,
+zknoid-chain-dev:test:         [7m   [0m [96m    ~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:         An argument for 'name' was not provided.
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m118[0m:[93m59[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m118[0m       let tx = await appChain.transaction(user.publicKey, () => {
+zknoid-chain-dev:test:     [7m   [0m [91m                                                          ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m132[0m:[93m59[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m132[0m       let tx = await appChain.transaction(user.publicKey, () => {
+zknoid-chain-dev:test:     [7m   [0m [91m                                                          ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m145[0m:[93m59[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m145[0m       let tx = await appChain.transaction(user.publicKey, () => {
+zknoid-chain-dev:test:     [7m   [0m [91m                                                          ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/Matchmaker.test.ts[0m:[93m163[0m:[93m59[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m163[0m       let tx = await appChain.transaction(user.publicKey, () => {
+zknoid-chain-dev:test:     [7m   [0m [91m                                                          ~~~~~~~[0m
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test: FAIL test/GameHub.test.ts
+zknoid-chain-dev:test:   ● Test suite failed to run
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m13[0m:[93m34[0m - [91merror[0m[90m TS2307: [0mCannot find module 'o1js/dist/node/lib/proof_system' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m13[0m import { dummyBase64Proof } from 'o1js/dist/node/lib/proof_system';
+zknoid-chain-dev:test:     [7m  [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m31[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/ArkanoidGameHub' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m31[0m } from '../src/ArkanoidGameHub';
+zknoid-chain-dev:test:     [7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m32[0m:[93m29[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/GameContext' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m32[0m import { GameContext } from '../src/GameContext';
+zknoid-chain-dev:test:     [7m  [0m [91m                            ~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m33[0m:[93m26[0m - [91merror[0m[90m TS2307: [0mCannot find module '../src/balances' or its corresponding type declarations.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m33[0m import { Balances } from '../src/balances';
+zknoid-chain-dev:test:     [7m  [0m [91m                         ~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m73[0m:[93m9[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'ArkanoidGameHub' does not exist in type 'TypedClass<RuntimeModule<unknown>>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m73[0m         ArkanoidGameHub,
+zknoid-chain-dev:test:     [7m  [0m [91m        ~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:       [96m../../node_modules/.pnpm/@proto-kit+common@0.1.1-develop.833_o1js@1.6.0_tsyringe@4.8.0/node_modules/@proto-kit/common/dist/config/ModuleContainer.d.ts[0m:[93m22[0m:[93m5[0m
+zknoid-chain-dev:test:         [7m22[0m     [name: string]: ModuleType;
+zknoid-chain-dev:test:         [7m  [0m [96m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:         The expected type comes from this index signature.
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m94[0m:[93m52[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m94[0m       const tx = await appChain.transaction(alice, () => {
+zknoid-chain-dev:test:     [7m  [0m [91m                                                   ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m95[0m:[93m17[0m - [91merror[0m[90m TS2339: [0mProperty 'createCompetition' does not exist on type 'RuntimeModule<unknown>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m95[0m         gameHub.createCompetition(competition);
+zknoid-chain-dev:test:     [7m  [0m [91m                ~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m138[0m:[93m7[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type 'MapGenerationProof'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m138[0m       mapGenerationProof,
+zknoid-chain-dev:test:     [7m   [0m [91m      ~~~~~~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m147[0m:[93m51[0m - [91merror[0m[90m TS2345: [0mArgument of type '() => void' is not assignable to parameter of type '() => Promise<void>'.
+zknoid-chain-dev:test:       Type 'void' is not assignable to type 'Promise<void>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m147[0m     const tx1 = await appChain.transaction(alice, () => {
+zknoid-chain-dev:test:     [7m   [0m [91m                                                  ~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m148[0m:[93m15[0m - [91merror[0m[90m TS2339: [0mProperty 'addGameResult' does not exist on type 'RuntimeModule<unknown>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m148[0m       gameHub.addGameResult(UInt64.from(0), gameRecordProof);
+zknoid-chain-dev:test:     [7m   [0m [91m              ~~~~~~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m154[0m:[93m53[0m - [91merror[0m[90m TS2339: [0mProperty 'lastSeed' does not exist on type 'ModuleQuery<RuntimeModule<unknown>>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m154[0m       (await appChain.query.runtime.ArkanoidGameHub.lastSeed.get()) ??
+zknoid-chain-dev:test:     [7m   [0m [91m                                                    ~~~~~~~~[0m
+zknoid-chain-dev:test:     [96mtest/GameHub.test.ts[0m:[93m163[0m:[93m52[0m - [91merror[0m[90m TS2339: [0mProperty 'gameRecords' does not exist on type 'ModuleQuery<RuntimeModule<unknown>>'.
+zknoid-chain-dev:test: 
+zknoid-chain-dev:test:     [7m163[0m       await appChain.query.runtime.ArkanoidGameHub.gameRecords.get(
+zknoid-chain-dev:test:     [7m   [0m [91m                                                   ~~~~~~~~~~~[0m
+zknoid-chain-dev:test: 
