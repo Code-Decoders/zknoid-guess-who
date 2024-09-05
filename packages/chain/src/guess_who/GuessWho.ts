@@ -375,27 +375,29 @@ export class GuessWhoGame extends MatchMaker {
         const { currPlayerId, game, sender } = await this.checkTxValidity(gameId);
 
         // Fix this if possible;
-        if (!currPlayerId) {
-            game.value.player1Board = game.value.player1Board.map((char) => {
-                if (char.id.equals(id)) {
-                    return new CharacterInfo({
-                        ...char,
-                        isPicked: Bool(true)
-                    })
-                }
-                return char
-            });
-        } else {
-            game.value.player2Board = game.value.player2Board.map((char) => {
-                if (char.id.equals(id)) {
-                    return new CharacterInfo({
-                        ...char,
-                        isPicked: Bool(true)
-                    })
-                }
-                return char
-            });
-        }
+        Provable.asProver(() => {
+            if (!currPlayerId) {
+                game.value.player1Board = game.value.player1Board.map((char) => {
+                    if (char.id.equals(id)) {
+                        return new CharacterInfo({
+                            ...char,
+                            isPicked: Bool(true)
+                        })
+                    }
+                    return char
+                });
+            } else {
+                game.value.player2Board = game.value.player2Board.map((char) => {
+                    if (char.id.equals(id)) {
+                        return new CharacterInfo({
+                            ...char,
+                            isPicked: Bool(true)
+                        })
+                    }
+                    return char
+                });
+            }
+        })
         await this.games.set(gameId, game.value);
     }
 
@@ -428,16 +430,18 @@ export class GuessWhoGame extends MatchMaker {
         const { game, currPlayerId } = await this.checkTxValidity(gameId, true);
 
         // Check for a valid move.
-        questions.map((val) => {
-            const words = val.split(" ")
-            const currTrait = words[words.length - 1].replace("?", "")
-            if (!currPlayerId) {
-                const pickedPlayer = game.value.player1Board.filter((val) => val.isPicked)[0]
-                assert(Bool(pickedPlayer.traits.includes(UInt64.from(Trait.indexOf(currTrait)))), "Invalid response")
-            } else {
-                const pickedPlayer = game.value.player2Board.filter((val) => val.isPicked)[0]
-                assert(Bool(pickedPlayer.traits.includes(UInt64.from(Trait.indexOf(currTrait)))), "Invalid response")
-            }
+        Provable.asProver(() => {
+            questions.map((val) => {
+                const words = val.split(" ")
+                const currTrait = words[words.length - 1].replace("?", "")
+                if (!currPlayerId) {
+                    const pickedPlayer = game.value.player1Board.filter((val) => val.isPicked)[0]
+                    assert(Bool(pickedPlayer.traits.includes(UInt64.from(Trait.indexOf(currTrait)))), "Invalid response")
+                } else {
+                    const pickedPlayer = game.value.player2Board.filter((val) => val.isPicked)[0]
+                    assert(Bool(pickedPlayer.traits.includes(UInt64.from(Trait.indexOf(currTrait)))), "Invalid response")
+                }
+            })
         })
 
         assert(Bool(game.value.cycles.length > 0), 'No cycles');
@@ -460,22 +464,25 @@ export class GuessWhoGame extends MatchMaker {
         const currBoard = currPlayerId ? game.value.player2Board : game.value.player1Board
         var newMoves: CharacterInfo[] = [];
 
-        for (let newCharInfo of playerBoard.value) {
-            for (let currCharInfo of currBoard) {
-                if (newCharInfo.id == currCharInfo.id) {
-                    if (newCharInfo.isCancelled.equals(currCharInfo.isCancelled).not() && !newCharInfo.isCancelled) {
-                        newMoves.push(newCharInfo)
-                        newCharInfo.isCancelled = Bool(true)
-                        playerBoard.value = playerBoard.value.map((x) => x.id == newCharInfo.id ? newCharInfo : x)
-                        if (!currPlayerId) {
-                            game.value.player1Board = playerBoard.value
-                        } else {
-                            game.value.player2Board = playerBoard.value
+        Provable.asProver(() => {
+            for (let newCharInfo of playerBoard.value) {
+                for (let currCharInfo of currBoard) {
+                    if (newCharInfo.id == currCharInfo.id) {
+                        if (newCharInfo.isCancelled.equals(currCharInfo.isCancelled).not() && !newCharInfo.isCancelled) {
+                            newMoves.push(newCharInfo)
+                            newCharInfo.isCancelled = Bool(true)
+                            playerBoard.value = playerBoard.value.map((x) => x.id == newCharInfo.id ? newCharInfo : x)
+                            if (!currPlayerId) {
+                                game.value.player1Board = playerBoard.value
+                            } else {
+                                game.value.player2Board = playerBoard.value
+                            }
                         }
                     }
                 }
             }
-        }
+
+        })
 
         var lastCycleIndex = game.value.cycles.length - 1;
         let lastCycle = game.value.cycles[lastCycleIndex];
@@ -495,7 +502,7 @@ export class GuessWhoGame extends MatchMaker {
         game.value.lastMoveBlockHeight = this.network.block.height;
 
         await this.games.set(gameId, game.value);
-        this.checkWin(gameId);
+        await this.checkWin(gameId);
     }
 
     private async checkWin(gameId: UInt64) {
@@ -511,32 +518,21 @@ export class GuessWhoGame extends MatchMaker {
             player2Remaining.length == 1
         )
 
-        if (player1Remaining.length == 1) {
-
-            game.value.winner = Provable.if(
-                player1Remaining[0].id.equals(player2Picked!.id),
-                game.value.player1,
-                game.value.player2
-            )
-
-            // if (player1Remaining[0].id == player2Picked!.id) {
-            //   game.value.winner = game.value.player1;
-            // } else {
-            //   game.value.winner = game.value.player2;
-            // }
-        } else if (player2Remaining.length == 1) {
-            game.value.winner = Provable.if(
-                player2Remaining[0].id.equals(player1Picked!.id),
-                game.value.player2,
-                game.value.player1
-            )
-
-            // if (player2Remaining[0].id == player1Picked!.id) {
-            //   game.value.winner = game.value.player2;
-            // } else {
-            //   game.value.winner = game.value.player1;
-            // }
-        }
+        Provable.asProver(() => {
+            if (player1Remaining.length == 1) {
+                game.value.winner = Provable.if(
+                    player1Remaining[0].id.equals(player2Picked!.id),
+                    game.value.player1,
+                    game.value.player2
+                )
+            } else if (player2Remaining.length == 1) {
+                game.value.winner = Provable.if(
+                    player2Remaining[0].id.equals(player1Picked!.id),
+                    game.value.player2,
+                    game.value.player1
+                )
+            }
+        })
 
         const winnerShare = ProtoUInt64.from(
             Provable.if<ProtoUInt64>(

@@ -13,4 +13,6 @@ appChain.configurePartial({
   },
 });
 
+console.log("This is the appChain client", appChain)
+
 export const client = appChain;

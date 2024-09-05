@@ -9,25 +9,25 @@ import { GuessGame } from './number_guessing';
 import { GuessWhoGame } from './guess_who';
 
 const modules = {
-  ArkanoidGameHub,
-  ThimblerigLogic,
-  Balances,
-  RandzuLogic,
   GuessWhoGame,
-  CheckersLogic,
-  GuessGame
+  Balances,
+  // ArkanoidGameHub,
+  // ThimblerigLogic,
+  // RandzuLogic,
+  // CheckersLogic,
+  // GuessGame
 };
 
 const config: ModulesConfig<typeof modules> = {
-  ArkanoidGameHub: {},
-  ThimblerigLogic: {},
+  GuessWhoGame: {},
   Balances: {
     totalSupply: UInt64.from(10000),
   },
-  RandzuLogic: {},
-  CheckersLogic: {},
-  GuessWhoGame: {},
-  GuessGame: {}
+  // ArkanoidGameHub: {},
+  // ThimblerigLogic: {},
+  // RandzuLogic: {},
+  // CheckersLogic: {},
+  // GuessGame: {}
 };
 
 export default {

@@ -11,14 +11,14 @@ import { guessWhoConfig } from './guess_who/config';
 
 export const zkNoidConfig = createConfig({
   games: [
-    lotteryConfig,
-    tileVilleConfig,
-    randzuConfig,
-    checkersConfig,
-    thimblerigConfig,
-    pokerConfig,
-    arkanoidConfig,
-    numberGuessingConfig,
+    // lotteryConfig,
+    // tileVilleConfig,
+    // randzuConfig,
+    // checkersConfig,
+    // thimblerigConfig,
+    // pokerConfig,
+    // arkanoidConfig,
+    // numberGuessingConfig,
     guessWhoConfig,
   ],
 });
