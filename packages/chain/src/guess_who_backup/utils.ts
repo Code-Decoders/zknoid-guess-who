@@ -10,7 +10,7 @@ export function shuffle(array: any[]) {
     return array
 }
 
-// export const uIntToNumber = (num: UInt64) => Number(num.toBigInt())
+export const uIntToNumber = (num: UInt64) => Number(num.toBigInt())
 
 export const updateCycle = async (cycle: GameCycle,
     { question, response, moves, phase }:
