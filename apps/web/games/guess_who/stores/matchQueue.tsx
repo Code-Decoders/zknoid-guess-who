@@ -140,9 +140,7 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
                 : 1;
             const player1 = gameInfo.player1 as PublicKey;
             const player2 = gameInfo.player2 as PublicKey;
-            // const field = (gameInfo.field as RandzuField).value.map((x: UInt32[]) =>
-            //   x.map((x) => x.toBigint())
-            // );
+
             const lastMoveBlockHeight = gameInfo.lastMoveBlockHeight;
             console.log('BH', lastMoveBlockHeight);
             set((state) => {
@@ -151,7 +149,7 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
                     player1,
                     player2,
                     currentMoveUser: gameInfo.currentMoveUser as PublicKey,
-                    cycles: gameInfo.field ?? gameInfo.thimblerigField, // @todo temporal workaround for proto-kit bug https://github.com/ZkNoid/proto-kit,
+                    cycles: gameInfo.cycles ?? gameInfo.thimblerigField, // @todo temporal workaround for proto-kit bug https://github.com/ZkNoid/proto-kit,
                     currentUserIndex,
                     isCurrentUserMove: (gameInfo.currentMoveUser as PublicKey)
                         .equals(address)
@@ -166,6 +164,8 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
                 console.log('Parsed game info', state.gameInfo);
             });
         }
+
+        console.log("This is the query", query)
 
         const pendingBalance = (
             await query.pendingBalances.get(address)
@@ -210,6 +210,9 @@ export const useObserveGuessWhoMatchQueue = () => {
         ) {
             return;
         }
+
+        console.log("This is the client", client)
+        console.log("This is the client runtime", client_.query)
 
         if (!client) {
             throw Error('Context app chain client is not set');

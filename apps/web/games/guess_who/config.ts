@@ -4,6 +4,7 @@ import { ZkNoidGameFeature, ZkNoidGameGenre } from '@/lib/platform/game_tags';
 import { GuessWhoGame } from 'zknoid-chain-dev';
 import { LogoMode } from '@/app/constants/games';
 import GuessWho from './GuessWho';
+import GuessWhoLobby from './components/GuessWhoLobby';
 
 export const guessWhoConfig = createZkNoidGameConfig({
     id: 'guess-who',
@@ -24,4 +25,5 @@ export const guessWhoConfig = createZkNoidGameConfig({
         GuessWhoGame,
     },
     page: GuessWho,
+    lobby: GuessWhoLobby
 });

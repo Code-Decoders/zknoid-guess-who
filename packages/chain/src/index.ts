@@ -19,6 +19,5 @@ export { Balances } from './framework';
 export * from './guess_who/index.js';
 
 export { GuessGame } from './number_guessing';
-// export { GuessWhoGame } from './guess_who';
 
 export { ClientAppChain, ProtokitLibrary, UInt64 as ProtoUInt64 };
