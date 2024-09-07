@@ -8,7 +8,7 @@ import {
     UInt64,
     CircuitString,
 } from 'o1js';
-import { StateMap, assert } from '@proto-kit/protocol';
+import { Option, StateMap, assert } from '@proto-kit/protocol';
 import { MatchMaker } from '../engine/MatchMaker';
 import { Lobby } from '../engine/LobbyManager';
 import { shuffle } from './utils';
@@ -38,9 +38,7 @@ export const Trait = [
     "male",
 ];
 
-export type CharName = ['', ''];
-
-export const questions: String[] = [
+export const questions: string[] = [
     'Is your character a male?',
     'Is your character wearing glasses?',
     'Is your character have a moustache?',
@@ -82,7 +80,7 @@ export class CharacterInfo extends Struct({
 }
 
 
-var characters: CharacterInfo[] = [
+export const characters: CharacterInfo[] = [
     {
         id: UInt64.from(0),
         name: CircuitString.fromString("Chantal"),
@@ -295,7 +293,7 @@ export class Board extends Struct({
 
     static from(value: CharacterInfo[]) {
         return new Board({
-            value: value.map((val) => new CharacterInfo({ ...val }))
+            value: value.map((val) => new CharacterInfo(val))
         })
     }
 }
@@ -519,22 +517,21 @@ export class GuessWhoGame extends MatchMaker {
 
         game.value.lastMoveBlockHeight = this.network.block.height;
 
-        await this.games.set(gameId, game.value);
-        await this.checkWin(gameId);
+        // await this.games.set(gameId, game.value);
+        await this.checkWin(gameId, game.value);
     }
 
     @runtimeMethod()
-    private async checkWin(gameId: UInt64) {
-        const { game } = await this.checkTxValidity(gameId);
+    private async checkWin(gameId: UInt64, game: GameInfo) {
 
 
         var player1Remaining: CharacterInfo[] = [], player1Picked, player2Remaining: CharacterInfo[] = [], player2Picked
 
         Provable.asProver(() => {
-            player1Remaining = game.value.player1Board.value.filter(val => !val.isCancelled);
-            player1Picked = game.value.player1Board.value.find((val) => val.isPicked)
-            player2Remaining = game.value.player2Board.value.filter(val => !val.isCancelled);
-            player2Picked = game.value.player2Board.value.find((val) => val.isPicked)
+            player1Remaining = game.player1Board.value.filter(val => !val.isCancelled);
+            player1Picked = game.player1Board.value.find((val) => val.isPicked)
+            player2Remaining = game.player2Board.value.filter(val => !val.isCancelled);
+            player2Picked = game.player2Board.value.find((val) => val.isPicked)
         })
 
         const winProposed = Bool.or(
@@ -544,19 +541,21 @@ export class GuessWhoGame extends MatchMaker {
 
         Provable.asProver(() => {
             if (player1Remaining.length == 1) {
-                game.value.winner = Provable.if(
+                game.winner = Provable.if(
                     player1Remaining[0].id.equals(player2Picked!.id),
-                    game.value.player1,
-                    game.value.player2
+                    game.player1,
+                    game.player2
                 )
             } else if (player2Remaining.length == 1) {
-                game.value.winner = Provable.if(
+                game.winner = Provable.if(
                     player2Remaining[0].id.equals(player1Picked!.id),
-                    game.value.player2,
-                    game.value.player1
+                    game.player2,
+                    game.player1
                 )
             }
         })
+
+        await this.games.set(gameId, game);
 
         const winnerShare = ProtoUInt64.from(
             Provable.if<ProtoUInt64>(
@@ -569,7 +568,7 @@ export class GuessWhoGame extends MatchMaker {
 
         await this.acquireFunds(
             gameId,
-            game.value.winner,
+            game.winner,
             PublicKey.empty(),
             winnerShare,
             ProtoUInt64.from(0),
@@ -577,15 +576,14 @@ export class GuessWhoGame extends MatchMaker {
         );
 
         await this.activeGameId.set(
-            Provable.if(winProposed, game.value.player2, PublicKey.empty()),
+            Provable.if(winProposed, game.player2, PublicKey.empty()),
             UInt64.from(0),
         );
         await this.activeGameId.set(
-            Provable.if(winProposed, game.value.player1, PublicKey.empty()),
+            Provable.if(winProposed, game.player1, PublicKey.empty()),
             UInt64.from(0),
         );
 
-        await this.games.set(gameId, game.value);
 
         await this._onLobbyEnd(gameId, winProposed);
     }

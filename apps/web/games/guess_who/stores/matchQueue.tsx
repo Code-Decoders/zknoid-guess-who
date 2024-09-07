@@ -81,6 +81,8 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
             UInt64.from(blockHeight).div(PENDING_BLOCKS_NUM)
         );
 
+        console.log("Queue length from loadMatchQueue",  queueLength)
+
         set((state) => {
             // @ts-ignore
             state.queueLength = Number(queueLength?.toBigInt() || 0);
@@ -97,7 +99,7 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
         });
 
         const activeGameId = await query?.activeGameId.get(address);
-        console.log('Active game idd', activeGameId);
+        console.log('Active game idd', Number(UInt64.from(activeGameId!).toBigInt()));
         const inQueue = await query?.queueRegisteredRoundUsers.get(
             //@ts-ignore
             new RoundIdxUser({
@@ -108,6 +110,7 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
 
         console.log('Active game idd', activeGameId?.toBigInt());
         console.log('In queue', inQueue?.toBoolean());
+        console.log("Following is  the game info", this.gameInfo)
 
         if (
             activeGameId?.equals(UInt64.from(0)).toBoolean() &&
@@ -128,6 +131,8 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
                 state.gameInfo!.isCurrentUserMove = false;
             });
         }
+
+        console.log(activeGameId?.greaterThan(UInt64.from(0)).toBoolean())
 
         if (activeGameId?.greaterThan(UInt64.from(0)).toBoolean()) {
             const gameInfo = (await query.games.get(activeGameId))!;
