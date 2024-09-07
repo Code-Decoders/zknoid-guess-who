@@ -117,7 +117,7 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
             this.gameInfo?.gameId
         ) {
             console.log('Setting last game state', this.gameInfo?.gameId);
-            const gameInfo = (await query.games.get(
+            const gameInfo = (await query?.games.get(
                 UInt64.from(this.gameInfo?.gameId!)
             ))!;
             console.log('Fetched last game info', gameInfo);
@@ -132,10 +132,9 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
             });
         }
 
-        console.log(activeGameId?.greaterThan(UInt64.from(0)).toBoolean())
-
         if (activeGameId?.greaterThan(UInt64.from(0)).toBoolean()) {
-            const gameInfo = (await query.games.get(activeGameId))!;
+            console.log("from loop", Number(UInt64.from(activeGameId!).toBigInt()))
+            const gameInfo = (await query?.games.get(activeGameId))!;
             console.log('Raw game info', gameInfo);
 
             const currentUserIndex = address
@@ -154,7 +153,7 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
                     player1,
                     player2,
                     currentMoveUser: gameInfo.currentMoveUser as PublicKey,
-                    cycles: gameInfo.cycles ?? gameInfo.thimblerigField, // @todo temporal workaround for proto-kit bug https://github.com/ZkNoid/proto-kit,
+                    cycles: gameInfo.cycles, // @todo temporal workaround for proto-kit bug https://github.com/ZkNoid/proto-kit,
                     currentUserIndex,
                     isCurrentUserMove: (gameInfo.currentMoveUser as PublicKey)
                         .equals(address)
@@ -222,6 +221,8 @@ export const useObserveGuessWhoMatchQueue = () => {
         if (!client) {
             throw Error('Context app chain client is not set');
         }
+
+        console.log("Following is the network address | user address", network.address)
 
         matchQueue.loadMatchQueue(
             client_.query.runtime.GuessWhoGame,

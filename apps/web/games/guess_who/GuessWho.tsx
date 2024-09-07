@@ -52,7 +52,7 @@ const competition = {
 const GuessWho = () => {
 
 
-    const [gameState, setGameState] = useState(GameState.NotStarted);
+    const [gameState, setGameState] = useState<GameState>(GameState.NotStarted);
     const [isRateGame, setIsRateGame] = useState<boolean>(true);
     const [loading, setLoading] = useState(true);
     const [loadingElement, setLoadingElement] = React.useState<
@@ -61,15 +61,15 @@ const GuessWho = () => {
     const { client } = useContext(ZkNoidGameContext);
 
     const networkStore = useNetworkStore();
-    const matchQueue = useGuessWhoMatchQueueStore();
     const toasterStore = useToasterStore();
     const rateGameStore = useRateGameStore();
     const protokitChain = useProtokitChainStore();
     useObserveGuessWhoMatchQueue();
+    const matchQueue = useGuessWhoMatchQueueStore();
     const progress = api.progress.setSolvedQuests.useMutation();
     const startGame = useStartGame(competition.id, setGameState);
     const getRatingQuery = api.ratings.getGameRating.useQuery({
-        gameId: 'randzu',
+        gameId: 'guess-who',
     });
 
     const client_ = client as ClientAppChain<

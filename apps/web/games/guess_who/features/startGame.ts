@@ -13,7 +13,7 @@ import { guessWhoConfig } from '../config';
 
 export const useStartGame = (
   competitionID: string,
-  setGameState: (state: GameState) => void
+  setGameState: any
 ) => {
   const gameStartedMutation = api.logging.logGameStarted.useMutation();
   const sessionPublicKey = useStore(useSessionKeyStore, (state) =>
@@ -49,7 +49,7 @@ export const useStartGame = (
 
     await progress.mutateAsync({
       userAddress: networkStore.address!,
-      section: 'GUESS WHO',
+      section: 'GUESSWHOGAME',
       id: 0,
       txHash: JSON.stringify((tx.transaction! as PendingTransaction).toJSON()),
       roomId: competitionID,
@@ -58,7 +58,7 @@ export const useStartGame = (
 
     await progress.mutateAsync({
       userAddress: networkStore.address!,
-      section: 'GUESS WHO',
+      section: 'GUESSWHOGAME',
       id: 1,
       txHash: JSON.stringify((tx.transaction! as PendingTransaction).toJSON()),
       roomId: competitionID,
