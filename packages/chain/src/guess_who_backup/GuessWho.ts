@@ -413,7 +413,6 @@ export class GuessWhoGame extends MatchMaker {
 
     // Create a new cycle for game
     game.value.cycles.push(cycle);
-    game.value.cycleCount.add(1);
     await this.games.set(gameId, game.value);
   }
 

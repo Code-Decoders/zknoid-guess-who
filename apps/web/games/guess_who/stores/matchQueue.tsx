@@ -1,4 +1,4 @@
-import { PublicKey, UInt64 } from 'o1js';
+import { Bool, PublicKey, UInt64 } from 'o1js';
 import { useContext, useEffect } from 'react';
 import { useProtokitChainStore } from '@/lib/stores/protokitChain';
 import { useNetworkStore } from '@/lib/stores/network';
@@ -11,11 +11,14 @@ import { immer } from 'zustand/middleware/immer';
 import { RoundIdxUser } from 'zknoid-chain-dev';
 import { MatchMaker, PENDING_BLOCKS_NUM_CONST } from 'zknoid-chain-dev';
 import { type ModuleQuery } from '@proto-kit/sequencer';
-import { GameCycle } from 'zknoid-chain-dev/dist/src/guess_who/GuessWho';
+import { Board, GameCycle } from 'zknoid-chain-dev/dist/src/guess_who/GuessWho';
+import { CharacterInfo } from '../lib/types';
 
 export interface IGameInfo<I> {
     player1: PublicKey;
     player2: PublicKey;
+    player1Board: Board;
+    player2Board: Board;
     currentMoveUser: PublicKey;
     winner: PublicKey;
     cycles: I;
@@ -32,7 +35,7 @@ export interface MatchQueueState {
     queueLength: number;
     inQueue: boolean;
     activeGameId: bigint;
-    gameInfo: IGameInfo<GameCycle> | undefined;
+    gameInfo: IGameInfo<GameCycle[]> | undefined;
     lastGameState: 'win' | 'lost' | undefined;
     pendingBalance: bigint;
     getQueueLength: () => number;
@@ -55,7 +58,7 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
     queueLength: 0,
     activeGameId: BigInt(0),
     inQueue: Boolean(false),
-    gameInfo: undefined as IGameInfo<GameCycle> | undefined,
+    gameInfo: undefined as IGameInfo<GameCycle[]> | undefined,
     lastGameState: undefined as 'win' | 'lost' | undefined,
     pendingBalance: 0n,
     resetLastGameState() {
@@ -81,7 +84,7 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
             UInt64.from(blockHeight).div(PENDING_BLOCKS_NUM)
         );
 
-        console.log("Queue length from loadMatchQueue",  queueLength)
+        console.log("Queue length from loadMatchQueue", queueLength)
 
         set((state) => {
             // @ts-ignore
@@ -164,8 +167,12 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
                     winner: gameInfo.winner.equals(PublicKey.empty()).not().toBoolean()
                         ? gameInfo.winner
                         : undefined,
+                    someRandomValue: gameInfo.someRandomValue.toBigInt(),
+                    player1Board: gameInfo.player1Board,
+                    player2Board: gameInfo.player2Board,
                 };
-                console.log('Parsed game info', state.gameInfo);
+                // console.log('Current cycle question index', state.gameInfo.cycles.filter((val) => val.question.equals(UInt64.from(0)).not())[0].question.toString());
+                console.log('Parsed game info', state.gameInfo)
             });
         }
 

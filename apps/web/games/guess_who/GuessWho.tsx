@@ -17,7 +17,7 @@ import StartPopup from './components/popup/start_popup'
 import EndPopup from './components/popup/end_popup'
 import ReplyPopup from "./components/popup/reply_popup";
 import { character_data, question_key } from './_data/character_data'
-import { UInt64 } from 'o1js'
+import { Bool, UInt64 } from 'o1js'
 import { CharacterInfo, characters, questions, Trait } from './lib/types'
 import { useNetworkStore } from '@/lib/stores/network'
 import { useToasterStore } from '@/lib/stores/toasterStore'
@@ -59,6 +59,10 @@ const GuessWho = () => {
         { x: number; y: number } | undefined
     >({ x: 0, y: 0 });
     const { client } = useContext(ZkNoidGameContext);
+
+    if (!client) {
+        throw Error('Context app chain client is not set');
+    }
 
     const networkStore = useNetworkStore();
     const toasterStore = useToasterStore();
@@ -188,7 +192,79 @@ const GuessWho = () => {
 
     }, [matchQueue.activeGameId, matchQueue.inQueue, matchQueue.lastGameState]);
 
+    const selectCharacter = async (index: UInt64) => {
+        if (!matchQueue.gameInfo?.isCurrentUserMove) return;
+        console.log('After checks');
+
+        const guessWhoGame = client.runtime.resolve('GuessWhoGame');
+
+        const tx = await client.transaction(
+            sessionPrivateKey.toPublicKey(),
+            async () => {
+                guessWhoGame.selectCharacter(
+                    UInt64.from(matchQueue.gameInfo!.gameId),
+                    index
+                );
+            }
+        );
+
+        setLoading(true);
+
+        tx.transaction = tx.transaction?.sign(sessionPrivateKey);
+        await tx.send();
+
+        setLoading(false)
+    }
+
     const makeMove = () => { }
+
+    const askQuestion = async (index: UInt64) => {
+        if (!matchQueue.gameInfo?.isCurrentUserMove) return;
+        console.log('After checks');
+
+        const guessWhoGame = client.runtime.resolve('GuessWhoGame');
+
+        const tx = await client.transaction(
+            sessionPrivateKey.toPublicKey(),
+            async () => {
+                guessWhoGame.askQuestion(
+                    UInt64.from(matchQueue.gameInfo!.gameId),
+                    index
+                );
+            }
+        );
+
+        setLoading(true);
+
+        tx.transaction = tx.transaction?.sign(sessionPrivateKey);
+        await tx.send();
+
+        setLoading(false)
+    }
+
+    const respond = async (response: Bool) => {
+        if (!matchQueue.gameInfo?.isCurrentUserMove) return;
+        console.log('After checks');
+
+        const guessWhoGame = client.runtime.resolve('GuessWhoGame');
+
+        const tx = await client.transaction(
+            sessionPrivateKey.toPublicKey(),
+            async () => {
+                guessWhoGame.respond(
+                    UInt64.from(matchQueue.gameInfo!.gameId),
+                    response
+                );
+            }
+        );
+
+        setLoading(true);
+
+        tx.transaction = tx.transaction?.sign(sessionPrivateKey);
+        await tx.send();
+
+        setLoading(false)
+     }
 
     return (
         <GamePage
@@ -198,8 +274,11 @@ const GuessWho = () => {
             defaultPage={'Game'}
         >
             <div>Hello</div>
+            <button onClick={() => selectCharacter(UInt64.from(1))}>Selectcharacter</button>
+            <button onClick={() => askQuestion(UInt64.from(4))}>Askquestion</button>
+            <button onClick={() => respond(Bool(true))}>Respond</button>
             {/* <div className={styles.container}>
-                <div className="flex-1 px-4 py-4">
+                <div className="flex-1 px-4 py-4"
                     <div className="grid grid-cols-6 gap-2">
                         {characters.map((character, index) => (
                             <CharacterCard
