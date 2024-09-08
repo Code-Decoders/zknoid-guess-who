@@ -11,7 +11,7 @@ interface CharacterData {
 
 interface CharacterCardProps {
   id: number;
-  character: CharacterInfo;
+  character: CharacterData;
   elimated: boolean;
   onChange: (id: CharacterData) => void;
 }

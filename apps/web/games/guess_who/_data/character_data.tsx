@@ -557,39 +557,39 @@ export function question_key(question: string) {
   }
 }
 
-// export function key_question(key: string) {
-//   switch (key) {
-//     case "male":
-//       return "Is your character a male?";
-//     case "glasses":
-//       return "Is your character wearing glasses?";
-//     case "mustache":
-//       return "Is your character have a moustache?";
-//     case "bunny_ears":
-//       return "Is your character wearing bunny ears?";
-//     case "bald":
-//       return "Is your character bald?";
-//     case "blonde":
-//       return "Does your character have blonde hair?";
-//     case "black":
-//       return "Does your character have black hair?";
-//     case "brown":
-//       return "Does your character have brown hair?";
-//     case "beard":
-//       return "Does your character have a beard?";
-//     case "bandana":
-//       return "Is your character wearing a bandana?";
-//     case "band":
-//       return "Is your character wearing a band in the hair?";
-//     case "earrings":
-//       return "is your character wearing earrings?";
-//     case "tie":
-//       return "Is your character wearing a tie?";
-//     case "necklace":
-//       return "Is your character wearing a necklace?";
-//     case "mouth_open":
-//       return "Does your character have mouth open?";
-//     default:
-//       return "";
-//   }
-// }
+export function key_question(key: string) {
+  switch (key) {
+    case "male":
+      return "Is your character a male?";
+    case "glasses":
+      return "Is your character wearing glasses?";
+    case "mustache":
+      return "Is your character have a moustache?";
+    case "bunny_ears":
+      return "Is your character wearing bunny ears?";
+    case "bald":
+      return "Is your character bald?";
+    case "blonde":
+      return "Does your character have blonde hair?";
+    case "black":
+      return "Does your character have black hair?";
+    case "brown":
+      return "Does your character have brown hair?";
+    case "beard":
+      return "Does your character have a beard?";
+    case "bandana":
+      return "Is your character wearing a bandana?";
+    case "band":
+      return "Is your character wearing a band in the hair?";
+    case "earrings":
+      return "is your character wearing earrings?";
+    case "tie":
+      return "Is your character wearing a tie?";
+    case "necklace":
+      return "Is your character wearing a necklace?";
+    case "mouth_open":
+      return "Does your character have mouth open?";
+    default:
+      return "";
+  }
+}
