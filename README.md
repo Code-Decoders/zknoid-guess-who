@@ -1,4 +1,8 @@
-# ZkNoid
+# ZkNoid X Guess Who
+
+"Guess Who" is a two-player game where each player tries to guess the identity of the other player's hidden character by asking a series of yes or no questions. By integrating with ZKnoid, the game would offer fast, gasless transactions and secure gameplay where each player's moves are verified without exposing their strategy by creating runtime modules for the game logic.
+
+
 
 ZkNoid is a home for ZK games platform on [Mina protocol](https://minaprotocol.com/).
 

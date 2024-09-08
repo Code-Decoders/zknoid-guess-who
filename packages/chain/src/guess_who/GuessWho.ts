@@ -786,82 +786,93 @@ export class GuessWhoGame extends MatchMaker {
 
     game.value.cycles[firstEmptyCycleIndex] = lastCycle;
 
-    game.value.currentMoveUser = Provable.if(
-      game.value.currentMoveUser.equals(game.value.player1),
-      game.value.player2,
-      game.value.player1,
-    );
-
-    game.value.lastMoveBlockHeight = this.network.block.height;
-
     // await this.games.set(gameId, game.value);
-      await this.checkWin(gameId, game.value);
+    await this.checkWin(gameId, game.value);
   }
 
+  @runtimeMethod()
+  private async checkWin(gameId: UInt64, game: GameInfo) {
+    const { currPlayerId } = await this.checkTxValidity(gameId);
 
-    @runtimeMethod()
-    private async checkWin(gameId: UInt64, game: GameInfo) {
-      const { currPlayerId } = await this.checkTxValidity(gameId);
+    let remainingCount = UInt64.from(0);
 
-      let remainingCount = UInt64.from(0);
-
-      Provable.asProver(() => {
-        if(currPlayerId.equals(UInt64.from(0)).toBoolean()) {
-          for (let i = 0; i < GW_CHAR_COUNT; i++) {
-            if(game.player1Board.value[i].isCancelled.equals(Bool(false)).toBoolean()) {
-              remainingCount = remainingCount.add(UInt64.from(1));
-            }
-          }
-        } else{
-          for (let i = 0; i < GW_CHAR_COUNT; i++) {
-            if(game.player2Board.value[i].isCancelled.equals(Bool(false)).toBoolean()) {
-              remainingCount = remainingCount.add(UInt64.from(1));
-            }
+    Provable.asProver(() => {
+      if (currPlayerId.equals(UInt64.from(0)).toBoolean()) {
+        for (let i = 0; i < GW_CHAR_COUNT; i++) {
+          if (
+            game.player1Board.value[i].isCancelled
+              .equals(Bool(false))
+              .toBoolean()
+          ) {
+            remainingCount = remainingCount.add(UInt64.from(1));
           }
         }
-      });
+      } else {
+        for (let i = 0; i < GW_CHAR_COUNT; i++) {
+          if (
+            game.player2Board.value[i].isCancelled
+              .equals(Bool(false))
+              .toBoolean()
+          ) {
+            remainingCount = remainingCount.add(UInt64.from(1));
+          }
+        }
+      }
+    });
 
-      const winProposed = Provable.if(
-        remainingCount.equals(UInt64.from(1)),
-        Bool(true),
-        Bool(false),
-      );
+    const winProposed = Provable.if(
+      remainingCount.equals(UInt64.from(1)),
+      Bool(true),
+      Bool(false),
+    );
 
-      game.winner = Provable.if(
+    game.winner = Provable.if(
+      winProposed,
+      game.currentMoveUser,
+      PublicKey.empty(),
+    );
+
+    const winnerShare = ProtoUInt64.from(
+      Provable.if<ProtoUInt64>(
         winProposed,
-        game.currentMoveUser,
-        PublicKey.empty(),
-      );
-
-      await this.games.set(gameId, game);
-
-      const winnerShare = ProtoUInt64.from(
-        Provable.if<ProtoUInt64>(
-          winProposed,
-          ProtoUInt64,
-          ProtoUInt64.from(1),
-          ProtoUInt64.from(0),
-        ),
-      );
-
-      await this.acquireFunds(
-        gameId,
-        game.winner,
-        PublicKey.empty(),
-        winnerShare,
-        ProtoUInt64.from(0),
+        ProtoUInt64,
         ProtoUInt64.from(1),
-      );
+        ProtoUInt64.from(0),
+      ),
+    );
 
-      await this.activeGameId.set(
-        Provable.if(winProposed, game.player2, PublicKey.empty()),
-        UInt64.from(0),
-      );
-      await this.activeGameId.set(
-        Provable.if(winProposed, game.player1, PublicKey.empty()),
-        UInt64.from(0),
-      );
+    await this.acquireFunds(
+      gameId,
+      game.winner,
+      PublicKey.empty(),
+      winnerShare,
+      ProtoUInt64.from(0),
+      ProtoUInt64.from(1),
+    );
 
-      await this._onLobbyEnd(gameId, winProposed);
-    }
+    await this.activeGameId.set(
+      Provable.if(winProposed, game.player2, PublicKey.empty()),
+      UInt64.from(0),
+    );
+    await this.activeGameId.set(
+      Provable.if(winProposed, game.player1, PublicKey.empty()),
+      UInt64.from(0),
+    );
+
+    game.currentMoveUser = Provable.if(
+      winProposed,
+      game.currentMoveUser,
+      Provable.if(
+        game.currentMoveUser.equals(game.player1),
+        game.player2,
+        game.player1,
+      ),
+    );
+
+    game.lastMoveBlockHeight = this.network.block.height;
+
+    await this.games.set(gameId, game);
+
+    await this._onLobbyEnd(gameId, winProposed);
+  }
 }
