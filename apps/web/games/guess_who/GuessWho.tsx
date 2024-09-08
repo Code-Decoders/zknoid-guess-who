@@ -35,6 +35,10 @@ import { api } from '@/trpc/react';
 import { useContext, useState } from 'react';
 import { Board } from 'zknoid-chain-dev/dist/src/guess_who/GuessWho';
 import WaitingPopup from './components/popup/waiting';
+import "./main.css"
+import { GameWrap } from '@/components/framework/GamePage/GameWrap';
+import { Win } from '@/components/framework/GameWidget/ui/popups/Win';
+import { Lost } from '@/components/framework/GameWidget/ui/popups/Lost';
 
 // export const key_question = (question: string): string => {
 //     const trait = question.split(' ').at(-1)?.replace('?', '')!;
@@ -138,6 +142,8 @@ const GuessWho = () => {
         // if (matchQueue.gameInfo?.parsed.currentCycle) {
         //     setGameState(GameState.Waiting)
         // }
+
+        console.log("Match Queue: ", matchQueue)
 
         if (matchQueue.inQueue && !matchQueue.activeGameId) {
             setGameState(GameState.Matchmaking);
@@ -279,6 +285,7 @@ const GuessWho = () => {
     const [character, setCharacter] = React.useState<CharacterData | null>();
     const [selectQuestion, setSelectQuestion] = React.useState<string>("");
     const [givenAnswer, setGivenAnswer] = React.useState<boolean | null>(null);
+    const [characterSetOnChain, setCharacterSetOnChain] = React.useState<boolean>(false);
     const [remainingQuestion, setRemainingQuestion] =
         React.useState<string[]>(questions);
 
@@ -319,8 +326,22 @@ const GuessWho = () => {
 
     React.useEffect(() => {
         if (matchQueue.gameInfo) {
+            if(matchQueue.gameInfo.parsed.winner){
+                if( matchQueue.gameInfo.parsed.winner   == networkStore.address) {
+                    setGameState(GameState.Won);
+                } else {
+                    setGameState(GameState.Lost);
+                }
+            }
+
+
             setGameState(matchQueue.gameInfo.isCurrentUserMove ? GameState.Active : GameState.Waiting)
-            setCharacter(character_data[(matchQueue.gameInfo?.player1.toBase58() === networkStore.address ? matchQueue.gameInfo?.parsed?.player1Board.find((e: any) => e.isPicked)?.id : matchQueue.gameInfo?.parsed?.player2Board.find((e: any) => e.isPicked)?.id)])
+            const char = character_data[(matchQueue.gameInfo?.player1.toBase58() === networkStore.address ? matchQueue.gameInfo?.parsed?.player1Board.find((e: any) => e.isPicked)?.id : matchQueue.gameInfo?.parsed?.player2Board.find((e: any) => e.isPicked)?.id)]
+            if (char) {
+                setCharacter(char);
+                setCharacterSetOnChain(true);
+            }
+
 
             setOpponentElimatedCharacters(matchQueue.gameInfo?.player1.toBase58() === networkStore.address ?
                 matchQueue.gameInfo?.parsed?.player2Board.filter((e: any) => e.isCancelled).map((e: any) => e.id) :
@@ -340,20 +361,20 @@ const GuessWho = () => {
 
             switch (currentPhase) {
                 case 0:
-                    setStatus("question");
+                    if (characterSetOnChain) {
+                        setStatus("question");
+                    } else {
+                        setStatus("selection");
+                    }
                     break;
                 case 1:
                     setSelectQuestion(questions[matchQueue.gameInfo?.parsed.currentCycle.question]);
                     setStatus("reply");
                     break;
                 case 2:
-                    if (givenAnswer === null) {
-                        setStatus("answer");
-                        setSelectQuestion(questions[matchQueue.gameInfo?.parsed.currentCycle.question]);
-                    } else {
-                        setSelectQuestion(questions[matchQueue.gameInfo?.parsed.currentCycle.question]);
-                        setGivenAnswer(matchQueue.gameInfo?.parsed.currentCycle.answer);
-                    }
+                    setSelectQuestion(questions[matchQueue.gameInfo?.parsed.currentCycle.question]);
+                    setStatus("answer");
+                    setGivenAnswer(matchQueue.gameInfo?.parsed.currentCycle.response);
                     break;
                 default:
                     setStatus("question");
@@ -500,11 +521,12 @@ const GuessWho = () => {
                     <div className="fixed top-0 left-0 right-0 bottom-0 bg-[#00000056] flex items-center justify-center">
                         <div className="absolute border-4 border-[#20d6d7] bg-[#0e6667] rounded-lg px-[20px] py-[30px] w-[500px] flex flex-col items-center justify-center">
                             <div className="text-[20px] font-bold text-center">
-                                <p className="mb-[20px]">{selectQuestion}</p>
+                                <p className="mb-[20px]">{selectQuestion.replaceAll("_", " ")}</p>
                                 <p>
-                                    {botCharacter && botCharacter[question_key(selectQuestion)]
-                                        ? "Yes"
-                                        : "No"}
+                                    {givenAnswer == null ? "Loading" :
+                                        givenAnswer
+                                            ? "Yes"
+                                            : "No"}
                                 </p>
                             </div>
                             <Image
@@ -529,6 +551,7 @@ const GuessWho = () => {
                                     character={character!}
                                     question={selectQuestion}
                                     onClick={(answer) => {
+                                        console.log(answer)
                                         respond(Bool(answer))
                                         setGameState(GameState.Waiting)
                                         setStatus("question");
@@ -546,6 +569,20 @@ const GuessWho = () => {
                             )}
 
                         </>)
+                }
+                   {gameState === GameState.Won &&
+                    (<GameWrap>
+                        <Win
+                            onBtnClick={restart}
+                            title={'You won! Congratulations!'}
+                            btnText={'Find new game'}
+                        />
+                    </GameWrap>)
+                }
+                {gameState === GameState.Lost &&
+                    (<GameWrap>
+                        <Lost startGame={restart} />
+                    </GameWrap>)
                 }
             </div>
         </GamePage>

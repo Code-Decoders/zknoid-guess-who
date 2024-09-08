@@ -29,17 +29,17 @@ const QuestionRow = (props: QuestionRowProps) => {
       <div
         className={
           "border-4 rounded-lg border-white flex-1 flex items-center justify-center text-[20px] font-bold " +
-          `${props.status !== "question" ? "opacity-50" : ""}`
+          `${props.status !== "question" ? "opacity-50" : "highlight"}`
         }
       >
-        {props.questions[index]}
+        {props.questions[index].replaceAll("_", " ")}
       </div>
       <Image
         src={"/guess-who/images/arrow_default.png"}
         width={50}
         height={50}
         onClick={() =>
-          setIndex((prev) => (prev > props.questions.length - 2 ? 0 : prev + 1))
+          setIndex((prev) => (prev > props.questions.length - 1 ? 0 : prev + 1))
         }
         alt="Arrow Left"
         className={

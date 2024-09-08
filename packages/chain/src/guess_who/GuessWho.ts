@@ -794,59 +794,44 @@ export class GuessWhoGame extends MatchMaker {
 
     game.value.lastMoveBlockHeight = this.network.block.height;
 
-    await this.games.set(gameId, game.value);
-    //   await this.checkWin(gameId, game.value);
+    // await this.games.set(gameId, game.value);
+      await this.checkWin(gameId, game.value);
   }
 
-  // @runtimeMethod()
-  // public async declareWinner(gameId: UInt64) {
-    
-  // }
 
     @runtimeMethod()
     private async checkWin(gameId: UInt64, game: GameInfo) {
-      var player1Remaining: CharacterInfo[] = [],
-        player1Picked,
-        player2Remaining: CharacterInfo[] = [],
-        player2Picked;
+      const { currPlayerId } = await this.checkTxValidity(gameId);
+
+      let remainingCount = UInt64.from(0);
 
       Provable.asProver(() => {
-        player1Remaining = game.player1Board.value.filter(
-          (val) => !val.isCancelled,
-        );
-        player1Picked = game.player1Board.value.find((val) => val.isPicked);
-        player2Remaining = game.player2Board.value.filter(
-          (val) => !val.isCancelled,
-        );
-        player2Picked = game.player2Board.value.find((val) => val.isPicked);
-      });
-
-      const winProposed = Bool.or(
-        UInt64.from(player1Remaining.length).equals(UInt64.from(1)),
-        UInt64.from(player2Remaining.length).equals(UInt64.from(1)),
-      );
-
-      Provable.asProver(() => {
-        if (
-          UInt64.from(player1Remaining.length).equals(UInt64.from(1)).toBoolean()
-        ) {
-          game.winner = Provable.if(
-            player1Remaining[0].id.equals(player2Picked!.id),
-            game.player1,
-            game.player2,
-          );
-        } else if (
-          UInt64.from(player2Remaining.length).equals(UInt64.from(1)).toBoolean()
-        ) {
-          game.winner = Provable.if(
-            player2Remaining[0].id.equals(player1Picked!.id),
-            game.player2,
-            game.player1,
-          );
+        if(currPlayerId.equals(UInt64.from(0)).toBoolean()) {
+          for (let i = 0; i < GW_CHAR_COUNT; i++) {
+            if(game.player1Board.value[i].isCancelled.equals(Bool(false)).toBoolean()) {
+              remainingCount = remainingCount.add(UInt64.from(1));
+            }
+          }
+        } else{
+          for (let i = 0; i < GW_CHAR_COUNT; i++) {
+            if(game.player2Board.value[i].isCancelled.equals(Bool(false)).toBoolean()) {
+              remainingCount = remainingCount.add(UInt64.from(1));
+            }
+          }
         }
       });
 
-      // game.cycles[].phase = UInt64.from(3)
+      const winProposed = Provable.if(
+        remainingCount.equals(UInt64.from(1)),
+        Bool(true),
+        Bool(false),
+      );
+
+      game.winner = Provable.if(
+        winProposed,
+        game.currentMoveUser,
+        PublicKey.empty(),
+      );
 
       await this.games.set(gameId, game);
 

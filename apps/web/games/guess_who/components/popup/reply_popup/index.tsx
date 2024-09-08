@@ -24,11 +24,11 @@ const ReplyPopup = (props: ReplyPopupProps) => {
     <div className="fixed top-0 left-0 right-0 bottom-0 bg-[#00000056] flex items-center justify-center">
       <div className="relative border-4 border-[#20d6d7] bg-[#0e6667] rounded-lg px-[20px] py-[30px] w-[500px] flex flex-col items-center justify-center">
         <div className="text-[20px] font-bold text-center">
-          <p className="mb-[20px]">{props.question}</p>
+          <p className="mb-[20px]">{props.question.replaceAll("_"," ")}</p>
         </div>
         {warning && (
           <Image
-            src="/images/wrong_answer.png"
+            src="/guess-who/images/wrong_answer.png"
             width={100}
             height={100}
             className="absolute top-0 left-0 right-0 bottom-0 m-auto"
@@ -44,7 +44,7 @@ const ReplyPopup = (props: ReplyPopupProps) => {
               ) {
                 setWarning(true);
               } else {
-                props.onClick(true);
+                props.onClick(false);
               }
             }}
           />
@@ -54,7 +54,7 @@ const ReplyPopup = (props: ReplyPopupProps) => {
                 props.character &&
                 props.character[question_key(props.question)]
               ) {
-                props.onClick(false);
+                props.onClick(true);
               } else {
                 setWarning(true);
               }
