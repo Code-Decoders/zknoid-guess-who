@@ -324,7 +324,7 @@ const GuessWho = () => {
       <button onClick={() => selectCharacter(UInt64.from(1))}>
         Selectcharacter
       </button>
-      <button onClick={() => askQuestion(UInt64.from(4))}>Askquestion</button>
+      <button onClick={() => askQuestion(UInt64.from(5))}>Askquestion</button>
       <button onClick={() => respond(Bool(true))}>Respond</button>
       <button
         onClick={() =>

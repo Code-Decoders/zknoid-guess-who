@@ -498,7 +498,7 @@ export class GuessWhoGame extends MatchMaker {
     const currGameId = lobby.id;
 
     const emptyCycle = new GameCycle({
-      moves: Array(GW_CHAR_COUNT).fill(UInt64.from(0)),
+      moves: Array(GW_CHAR_COUNT).fill(UInt64.from(100)),
       phase: UInt64.from(0),
       question: UInt64.from(0),
       response: Bool(false),
@@ -635,7 +635,7 @@ export class GuessWhoGame extends MatchMaker {
     // })
 
     const cycle = new GameCycle({
-      moves: Array(GW_CHAR_COUNT).fill(UInt64.from(0)),
+      moves: Array(GW_CHAR_COUNT).fill(UInt64.from(100)),
       phase: UInt64.from(1),
       question: id,
       response: Bool(false),
@@ -648,6 +648,7 @@ export class GuessWhoGame extends MatchMaker {
       for (let i = 0; i < MAX_CYCLE_SIZE; i++) {
         if (game.value.cycles[i].phase.equals(UInt64.from(0)).toBoolean()) {
           firstEmptyCycleIndex = i;
+          break;
         }
       }
       console.log('This is the first empty cycle index', firstEmptyCycleIndex);
@@ -662,232 +663,215 @@ export class GuessWhoGame extends MatchMaker {
     await this.games.set(gameId, game.value);
   }
 
-//   @runtimeMethod()
-//   public async respond(gameId: UInt64, response: Bool): Promise<void> {
-//     const { game, currPlayerId } = await this.checkTxValidity(gameId, true);
+  @runtimeMethod()
+  public async respond(gameId: UInt64, response: Bool): Promise<void> {
+    const { game, currPlayerId } = await this.checkTxValidity(gameId, true);
 
-//     let isInvalid = false;
-//     let cycle = new GameCycle({
-//       moves: Array(GW_CHAR_COUNT).fill(UInt64.from(0)),
-//       phase: UInt64.from(2),
-//       question: UInt64.from(0),
-//       response: Bool(false),
-//     });
-//     let firstEmptyCycleIndex = 0;
+    // let isInvalid = Bool(false);
+    // let cycle = new GameCycle({
+    //   moves: Array(GW_CHAR_COUNT).fill(UInt64.from(0)),
+    //   phase: UInt64.from(2),
+    //   question: UInt64.from(0),
+    //   response: Bool(false),
+    // });
+    let firstEmptyCycleIndex = 0;
 
-//     // Create a new cycle for game
-//     Provable.asProver(() => {
-//       firstEmptyCycleIndex = game.value.cycles.findIndex((val) =>
-//         val.phase.equals(UInt64.from(1)).toBoolean(),
-//       );
-//       console.log('This is the first empty cycle index', firstEmptyCycleIndex);
-//     });
+    // Create a new cycle for game
+    Provable.asProver(() => {
+      for (let i = 0; i < MAX_CYCLE_SIZE; i++) {
+        if (game.value.cycles[i].phase.equals(UInt64.from(1)).toBoolean()) {
+          firstEmptyCycleIndex = i;
+          break;
+        }
+      }
+      console.log('This is the first empty cycle index', firstEmptyCycleIndex);
+      //   questions.map((val) => {
+      //     const words = val.split(' ');
+      //     const currTrait = words[words.length - 1].replace('?', '');
+      //     if (currPlayerId.equals(UInt64.from(0)).toBoolean()) {
+      //       const pickedPlayer = game.value.player1Board.value.filter((val) =>
+      //         val.isPicked.toBoolean(),
+      //       )[0];
+      //       if (
+      //         !pickedPlayer.traits.includes(UInt64.from(Trait.indexOf(currTrait)))
+      //       ) {
+      //         isInvalid = Bool(true);
+      //       }
+      //     } else {
+      //       const pickedPlayer = game.value.player2Board.value.filter((val) =>
+      //         val.isPicked.toBoolean(),
+      //       )[0];
+      //       if (
+      //         pickedPlayer.traits.includes(UInt64.from(Trait.indexOf(currTrait)))
+      //       ) {
+      //         isInvalid = Bool(true);
+      //       }
+      //     }
+      //   });
+    });
 
-//     // Check for a valid move.
-//     Provable.asProver(() => {
-//       questions.map((val) => {
-//         const words = val.split(' ');
-//         const currTrait = words[words.length - 1].replace('?', '');
-//         if (currPlayerId.equals(UInt64.from(0)).toBoolean()) {
-//           const pickedPlayer = game.value.player1Board.value.filter((val) =>
-//             val.isPicked.toBoolean(),
-//           )[0];
-//           if (
-//             !pickedPlayer.traits.includes(UInt64.from(Trait.indexOf(currTrait)))
-//           ) {
-//             isInvalid = true;
-//           }
-//         } else {
-//           const pickedPlayer = game.value.player2Board.value.filter((val) =>
-//             val.isPicked.toBoolean(),
-//           )[0];
-//           if (
-//             pickedPlayer.traits.includes(UInt64.from(Trait.indexOf(currTrait)))
-//           ) {
-//             isInvalid = true;
-//           }
-//         }
-//       });
-//       cycle = game.value.cycles[firstEmptyCycleIndex];
-//     });
+    // assert(Bool(isInvalid).not(), 'Invalid response');
 
-//     assert(Bool(isInvalid).not(), 'Invalid response');
+    let cycle = game.value.cycles[firstEmptyCycleIndex];
 
-//     cycle.response = response;
-//     cycle.phase = UInt64.from(2);
+    cycle.response = response;
+    cycle.phase = UInt64.from(2);
 
-//     game.value.cycles[firstEmptyCycleIndex] = cycle;
-//     game.value.lastMoveBlockHeight = this.network.block.height;
-//     game.value.currentMoveUser = Provable.if(
-//       game.value.currentMoveUser.equals(game.value.player1),
-//       game.value.player2,
-//       game.value.player1,
-//     );
-//     await this.games.set(gameId, game.value);
-//   }
+    game.value.cycles[firstEmptyCycleIndex] = cycle;
+    game.value.lastMoveBlockHeight = this.network.block.height;
+    game.value.currentMoveUser = Provable.if(
+      game.value.currentMoveUser.equals(game.value.player1),
+      game.value.player2,
+      game.value.player1,
+    );
+    await this.games.set(gameId, game.value);
+  }
 
-//   // // // Push the move to cycle, cancel the character from current player's board, update cycle phase and game.
-//   // // // Maybe update the name for this function.
-//   @runtimeMethod()
-//   public async makeMove(gameId: UInt64, playerBoard: Board): Promise<void> {
-//     const { game, currPlayerId } = await this.checkTxValidity(gameId);
-//     const currBoard = Provable.if(
-//       Bool(currPlayerId.equals(UInt64.from(0))),
-//       Board,
-//       game.value.player1Board,
-//       game.value.player2Board,
-//     );
+  // Push the move to cycle, cancel the character from current player's board, update cycle phase and game.
+  // Maybe update the name for this function.
+  @runtimeMethod()
+  public async makeMove(gameId: UInt64, playerBoard: Board): Promise<void> {
+    const { game, currPlayerId } = await this.checkTxValidity(gameId);
+    const currBoard = Provable.if(
+      Bool(currPlayerId.equals(UInt64.from(0))),
+      Board,
+      game.value.player1Board,
+      game.value.player2Board,
+    );
 
-//     var newMoves: UInt64[] = [];
-//     // var tempnewMoves: UInt64[] = [];
+    var newMoves: UInt64[] = [];
 
-//     let firstEmptyCycleIndex = 2;
+    let firstEmptyCycleIndex = 0;
 
-//     Provable.asProver(() => {
-//       for (let i = 0; i < MAX_CYCLE_SIZE; i++) {
-//         // console.log('This is the cycle phase', game.value.cycles[i].phase.toBigInt(), "is equal to 2", game.value.cycles[i].phase.equals(UInt64.from(2)).toBoolean());
-//         if (game.value.cycles[i].phase.equals(UInt64.from(2)).toBoolean()) {
-//           firstEmptyCycleIndex = i;
-//         }
-//       }
-//       //   console.log('This is the first empty cycle index', firstEmptyCycleIndex);
-//       for (let i = 0; i < GW_CHAR_COUNT; i++) {
-//         const newCharInfo = playerBoard.value[i];
-//         for (let j = 0; j < GW_CHAR_COUNT; j++) {
-//           const currCharInfo = currBoard.value[j];
-//           if (newCharInfo.id.equals(currCharInfo.id).toBoolean()) {
-//             // tempnewMoves.push(newCharInfo.id);
-//             // if (
-//             //   newCharInfo.isCancelled
-//             //     .equals(currCharInfo.isCancelled)
-//             //     .not()
-//             //     .toBoolean() &&
-//             //   newCharInfo.isCancelled.not().toBoolean()
-//             // ) {
-//             newCharInfo.isCancelled = Bool(true);
-//             newMoves.push(newCharInfo.id);
-//             playerBoard.value = playerBoard.value.map((x) =>
-//               Provable.if(
-//                 x.id.equals(newCharInfo.id),
-//                 CharacterInfo,
-//                 newCharInfo,
-//                 x,
-//               ),
-//             );
-//             if (currPlayerId.equals(UInt64.from(0)).toBoolean()) {
-//               game.value.player1Board.value = playerBoard.value;
-//             } else {
-//               game.value.player2Board.value = playerBoard.value;
-//             }
-//           }
-//           //   }
-//         }
-//       }
-//       console.log(
-//         'This is the new moves',
-//         newMoves.map((val) => val.toBigInt()),
-//       );
-//     });
+    Provable.asProver(() => {
+      for (let i = 0; i < MAX_CYCLE_SIZE; i++) {
+        if (game.value.cycles[i].phase.equals(UInt64.from(2)).toBoolean()) {
+          firstEmptyCycleIndex = i;
+          break;
+        }
+      }
 
-//     let lastCycle = game.value.cycles[firstEmptyCycleIndex];
+      for (let i = 0; i < GW_CHAR_COUNT; i++) {
+        const currCharInfo = currBoard.value[i];
+        for (let j = 0; j < GW_CHAR_COUNT; j++) {
+          let newCharInfo = playerBoard.value[j];
+          if (newCharInfo.id.equals(currCharInfo.id).toBoolean()) {
+            newCharInfo = currCharInfo;
+            newCharInfo.isCancelled = Bool(true);
+            newMoves.push(newCharInfo.id);
+            playerBoard.value[j] = newCharInfo;
+            if (currPlayerId.equals(UInt64.from(0)).toBoolean()) {
+              game.value.player1Board.value[i] = playerBoard.value[j];
+            } else {
+              game.value.player2Board.value[i] = playerBoard.value[j];
+            }
+          }
+          //   }
+        }
+      }
+    });
 
-//     assert(
-//       lastCycle.phase.equals(UInt64.from(2)),
-//       'Opponent is yet to respond',
-//     );
+    let lastCycle = game.value.cycles[firstEmptyCycleIndex];
 
-//     Provable.asProver(() => {
-//       lastCycle.moves.push(...newMoves);
-//     });
+    assert(
+      lastCycle.phase.equals(UInt64.from(2)),
+      'Opponent is yet to respond',
+    );
 
-//     game.value.cycles[firstEmptyCycleIndex] = lastCycle;
+    for (let j = 0; j < newMoves.length; j++) {
+      lastCycle.moves[j] = newMoves[j];
+    }
 
-//     game.value.currentMoveUser = Provable.if(
-//       game.value.currentMoveUser.equals(game.value.player1),
-//       game.value.player2,
-//       game.value.player1,
-//     );
+    lastCycle.phase = UInt64.from(3);
 
-//     game.value.lastMoveBlockHeight = this.network.block.height;
+    game.value.cycles[firstEmptyCycleIndex] = lastCycle;
 
-//     // await this.games.set(gameId, game.value);
-//     await this.checkWin(gameId, game.value);
-//   }
+    game.value.currentMoveUser = Provable.if(
+      game.value.currentMoveUser.equals(game.value.player1),
+      game.value.player2,
+      game.value.player1,
+    );
 
-//   @runtimeMethod()
-//   private async checkWin(gameId: UInt64, game: GameInfo) {
-//     var player1Remaining: CharacterInfo[] = [],
-//       player1Picked,
-//       player2Remaining: CharacterInfo[] = [],
-//       player2Picked;
+    game.value.lastMoveBlockHeight = this.network.block.height;
 
-//     Provable.asProver(() => {
-//       player1Remaining = game.player1Board.value.filter(
-//         (val) => !val.isCancelled,
-//       );
-//       player1Picked = game.player1Board.value.find((val) => val.isPicked);
-//       player2Remaining = game.player2Board.value.filter(
-//         (val) => !val.isCancelled,
-//       );
-//       player2Picked = game.player2Board.value.find((val) => val.isPicked);
-//     });
+    await this.games.set(gameId, game.value);
+    //   await this.checkWin(gameId, game.value);
+  }
 
-//     const winProposed = Bool.or(
-//       UInt64.from(player1Remaining.length).equals(UInt64.from(1)),
-//       UInt64.from(player2Remaining.length).equals(UInt64.from(1)),
-//     );
+  //   @runtimeMethod()
+  //   private async checkWin(gameId: UInt64, game: GameInfo) {
+  //     var player1Remaining: CharacterInfo[] = [],
+  //       player1Picked,
+  //       player2Remaining: CharacterInfo[] = [],
+  //       player2Picked;
 
-//     Provable.asProver(() => {
-//       if (
-//         UInt64.from(player1Remaining.length).equals(UInt64.from(1)).toBoolean()
-//       ) {
-//         game.winner = Provable.if(
-//           player1Remaining[0].id.equals(player2Picked!.id),
-//           game.player1,
-//           game.player2,
-//         );
-//       } else if (
-//         UInt64.from(player2Remaining.length).equals(UInt64.from(1)).toBoolean()
-//       ) {
-//         game.winner = Provable.if(
-//           player2Remaining[0].id.equals(player1Picked!.id),
-//           game.player2,
-//           game.player1,
-//         );
-//       }
-//     });
+  //     Provable.asProver(() => {
+  //       player1Remaining = game.player1Board.value.filter(
+  //         (val) => !val.isCancelled,
+  //       );
+  //       player1Picked = game.player1Board.value.find((val) => val.isPicked);
+  //       player2Remaining = game.player2Board.value.filter(
+  //         (val) => !val.isCancelled,
+  //       );
+  //       player2Picked = game.player2Board.value.find((val) => val.isPicked);
+  //     });
 
-//     // game.cycles[].phase = UInt64.from(3)
+  //     const winProposed = Bool.or(
+  //       UInt64.from(player1Remaining.length).equals(UInt64.from(1)),
+  //       UInt64.from(player2Remaining.length).equals(UInt64.from(1)),
+  //     );
 
-//     await this.games.set(gameId, game);
+  //     Provable.asProver(() => {
+  //       if (
+  //         UInt64.from(player1Remaining.length).equals(UInt64.from(1)).toBoolean()
+  //       ) {
+  //         game.winner = Provable.if(
+  //           player1Remaining[0].id.equals(player2Picked!.id),
+  //           game.player1,
+  //           game.player2,
+  //         );
+  //       } else if (
+  //         UInt64.from(player2Remaining.length).equals(UInt64.from(1)).toBoolean()
+  //       ) {
+  //         game.winner = Provable.if(
+  //           player2Remaining[0].id.equals(player1Picked!.id),
+  //           game.player2,
+  //           game.player1,
+  //         );
+  //       }
+  //     });
 
-//     const winnerShare = ProtoUInt64.from(
-//       Provable.if<ProtoUInt64>(
-//         winProposed,
-//         ProtoUInt64,
-//         ProtoUInt64.from(1),
-//         ProtoUInt64.from(0),
-//       ),
-//     );
+  //     // game.cycles[].phase = UInt64.from(3)
 
-//     await this.acquireFunds(
-//       gameId,
-//       game.winner,
-//       PublicKey.empty(),
-//       winnerShare,
-//       ProtoUInt64.from(0),
-//       ProtoUInt64.from(1),
-//     );
+  //     await this.games.set(gameId, game);
 
-//     await this.activeGameId.set(
-//       Provable.if(winProposed, game.player2, PublicKey.empty()),
-//       UInt64.from(0),
-//     );
-//     await this.activeGameId.set(
-//       Provable.if(winProposed, game.player1, PublicKey.empty()),
-//       UInt64.from(0),
-//     );
+  //     const winnerShare = ProtoUInt64.from(
+  //       Provable.if<ProtoUInt64>(
+  //         winProposed,
+  //         ProtoUInt64,
+  //         ProtoUInt64.from(1),
+  //         ProtoUInt64.from(0),
+  //       ),
+  //     );
 
-//     await this._onLobbyEnd(gameId, winProposed);
-//   }
+  //     await this.acquireFunds(
+  //       gameId,
+  //       game.winner,
+  //       PublicKey.empty(),
+  //       winnerShare,
+  //       ProtoUInt64.from(0),
+  //       ProtoUInt64.from(1),
+  //     );
+
+  //     await this.activeGameId.set(
+  //       Provable.if(winProposed, game.player2, PublicKey.empty()),
+  //       UInt64.from(0),
+  //     );
+  //     await this.activeGameId.set(
+  //       Provable.if(winProposed, game.player1, PublicKey.empty()),
+  //       UInt64.from(0),
+  //     );
+
+  //     await this._onLobbyEnd(gameId, winProposed);
+  //   }
 }
