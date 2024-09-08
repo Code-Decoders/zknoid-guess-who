@@ -474,7 +474,7 @@ export class GuessWhoGame extends MatchMaker {
 
         // Create a new cycle for game
         Provable.asProver(() => {
-            firstEmptyCycleIndex = game.value.cycles.findIndex((val) => Bool(val.phase.equals(UInt64.from(0)).toBoolean()))
+            firstEmptyCycleIndex = game.value.cycles.findIndex((val) => val.phase.equals(UInt64.from(0)).toBoolean())
             console.log("This is the first empty cycle index", firstEmptyCycleIndex)
         })
         game.value.cycles[firstEmptyCycleIndex] = cycle;
@@ -492,13 +492,20 @@ export class GuessWhoGame extends MatchMaker {
         const { game, currPlayerId } = await this.checkTxValidity(gameId, true);
 
         let isInvalid = false
-        let validCycles = []
         let cycle = new GameCycle({
             moves: Array(GW_CHAR_COUNT).fill(UInt64.from(0)),
             phase: UInt64.from(2),
             question: UInt64.from(0),
             response: Bool(false)
         })
+        let firstEmptyCycleIndex = 0
+
+        // Create a new cycle for game
+        Provable.asProver(() => {
+            firstEmptyCycleIndex = game.value.cycles.findIndex((val) => val.phase.equals(UInt64.from(1)).toBoolean())
+            console.log("This is the first empty cycle index", firstEmptyCycleIndex)
+        })
+
         // Check for a valid move.
         Provable.asProver(() => {
             questions.map((val) => {
@@ -506,48 +513,26 @@ export class GuessWhoGame extends MatchMaker {
                 const currTrait = words[words.length - 1].replace("?", "")
                 if (currPlayerId.equals(UInt64.from(0)).toBoolean()) {
                     const pickedPlayer = game.value.player1Board.value.filter((val) => val.isPicked.toBoolean())[0]
-                    console.log("Following is the picked player", pickedPlayer!.name.toString(),
-                        "and this is the trait we are looking for", currTrait.toString(),
-                        " This is it's index, ", Trait.indexOf(currTrait).toString(),
-                        "this being the checked value", (pickedPlayer.traits.includes(UInt64.from(Trait.indexOf(currTrait)))).toString(),
-                        "and following are the traits", pickedPlayer.traits.map((val) => val.toString())
-                    )
                     if (!pickedPlayer.traits.includes(UInt64.from(Trait.indexOf(currTrait)))) {
                         isInvalid = true
                     }
 
                 } else {
                     const pickedPlayer = game.value.player2Board.value.filter((val) => val.isPicked.toBoolean())[0]
-                    console.log("Following is the picked player", pickedPlayer!.name.toString(),
-                        "and this is the trait we are looking for", currTrait.toString(),
-                        " This is it's index, ", Trait.indexOf(currTrait).toString(),
-                        "this being the checked value", pickedPlayer.traits.includes(UInt64.from(Trait.indexOf(currTrait))).toString(),
-                        "and following are the traits", pickedPlayer.traits.map((val) => val.toString())
-                    )
                     if (pickedPlayer.traits.includes(UInt64.from(Trait.indexOf(currTrait)))) {
                         isInvalid = true
                     }
                 }
             })
-            validCycles = game.value.cycles.filter(val => Bool(val.phase.equals(UInt64.from(0).not()).toBoolean()))
-
-            console.log("Length of valid cycles", validCycles.length)
-
-            cycle = Provable.if(
-                Bool(validCycles.length > 0),
-                GameCycle,
-                game.value.cycles.at(validCycles.length - 1)!,
-                cycle
-            );
+            cycle = game.value.cycles[firstEmptyCycleIndex]
         })
 
         assert(Bool(isInvalid).not(), "Invalid response")
 
-        Provable.asProver(() => {
-            cycle.response = response;
-            cycle.phase = UInt64.from(2);
-        })
-        game.value.cycles[validCycles.length - 1] = cycle
+        cycle.response = response;
+        cycle.phase = UInt64.from(2);
+
+        game.value.cycles[firstEmptyCycleIndex] = cycle
         game.value.lastMoveBlockHeight = this.network.block.height;
         game.value.currentMoveUser = Provable.if(
             game.value.currentMoveUser.equals(game.value.player1),
@@ -559,122 +544,134 @@ export class GuessWhoGame extends MatchMaker {
 
     // // // Push the move to cycle, cancel the character from current player's board, update cycle phase and game.
     // // // Maybe update the name for this function.
-    // @runtimeMethod()
-    // public async makeMove(gameId: UInt64, playerBoard: Board): Promise<void> {
-    //     const { game, currPlayerId } = await this.checkTxValidity(gameId);
-    //     const currBoard = Provable.if(
-    //         Bool(currPlayerId.equals(UInt64.from(0))),
-    //         Board,
-    //         game.value.player1Board,
-    //         game.value.player2Board)
+    @runtimeMethod()
+    public async makeMove(gameId: UInt64, playerBoard: Board): Promise<void> {
+        const { game, currPlayerId } = await this.checkTxValidity(gameId);
+        const currBoard = Provable.if(
+            Bool(currPlayerId.equals(UInt64.from(0))),
+            Board,
+            game.value.player1Board,
+            game.value.player2Board)
 
-    //     var newMoves: CharacterInfo[] = [];
+        var newMoves: UInt64[] = [];
 
-    //     Provable.asProver(() => {
-    //         for (let newCharInfo of playerBoard.value) {
-    //             for (let currCharInfo of currBoard.value) {
-    //                 if (newCharInfo.id == currCharInfo.id) {
-    //                     if (newCharInfo.isCancelled.equals(currCharInfo.isCancelled).not() && !newCharInfo.isCancelled) {
-    //                         newMoves.push(newCharInfo)
-    //                         newCharInfo.isCancelled = Bool(true)
-    //                         playerBoard.value = playerBoard.value.map((x) => x.id == newCharInfo.id ? newCharInfo : x)
-    //                         if (!currPlayerId) {
-    //                             game.value.player1Board.value = playerBoard.value
-    //                         } else {
-    //                             game.value.player2Board.value = playerBoard.value
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
+        let firstEmptyCycleIndex = 0
 
-    //     })
+        // Create a new cycle for game
+        Provable.asProver(() => {
+            firstEmptyCycleIndex = game.value.cycles.findIndex((val) => val.phase.equals(UInt64.from(2)).toBoolean())
+            console.log("This is the first empty cycle index", firstEmptyCycleIndex)
+        })
 
-    //     var lastCycleIndex = game.value.cycles.length - 1;
-    //     let lastCycle = game.value.cycles[lastCycleIndex];
+        Provable.asProver(() => {
+            for (let newCharInfo of playerBoard.value) {
+                for (let currCharInfo of currBoard.value) {
+                    if (newCharInfo.id.equals(currCharInfo.id).toBoolean()) {
+                        if (newCharInfo.isCancelled.equals(currCharInfo.isCancelled).not().toBoolean() && newCharInfo.isCancelled.not().toBoolean()) {
+                            newCharInfo.isCancelled = Bool(true)
+                            newMoves.push(newCharInfo.id)
+                            playerBoard.value = playerBoard.value.map((x) => Provable.if(x.id.equals(newCharInfo.id), CharacterInfo, newCharInfo, x))
+                            if (currPlayerId.equals(UInt64.from(0)).toBoolean()) {
+                                game.value.player1Board.value = playerBoard.value
+                            } else {
+                                game.value.player2Board.value = playerBoard.value
+                            }
+                        }
+                    }
+                }
+            }
 
-    //     assert(lastCycle.phase.equals(UInt64.from(2)), 'Opponent is yet to respond');
+        })
 
-    //     lastCycle.moves = Provable.Array(UInt64, GW_CHAR_COUNT).fromValue([...lastCycle.moves, ...newMoves.map((x) => x.id)]);
+        let lastCycle = game.value.cycles[firstEmptyCycleIndex];
 
-    //     game.value.cycles[lastCycleIndex] = lastCycle;
+        assert(lastCycle.phase.equals(UInt64.from(2)), 'Opponent is yet to respond');
 
-    //     game.value.currentMoveUser = Provable.if(
-    //         game.value.currentMoveUser.equals(game.value.player1),
-    //         game.value.player2,
-    //         game.value.player1,
-    //     );
+        Provable.asProver(() => {
+            lastCycle.moves.push(...newMoves);
+        })
 
-    //     game.value.lastMoveBlockHeight = this.network.block.height;
+        game.value.cycles[firstEmptyCycleIndex] = lastCycle;
 
-    //     // await this.games.set(gameId, game.value);
-    //     await this.checkWin(gameId, game.value);
-    // }
+        game.value.currentMoveUser = Provable.if(
+            game.value.currentMoveUser.equals(game.value.player1),
+            game.value.player2,
+            game.value.player1,
+        );
 
-    // @runtimeMethod()
-    // private async checkWin(gameId: UInt64, game: GameInfo) {
+        game.value.lastMoveBlockHeight = this.network.block.height;
 
+        // await this.games.set(gameId, game.value);
+        await this.checkWin(gameId, game.value);
+    }
 
-    //     var player1Remaining: CharacterInfo[] = [], player1Picked, player2Remaining: CharacterInfo[] = [], player2Picked
-
-    //     Provable.asProver(() => {
-    //         player1Remaining = game.player1Board.value.filter(val => !val.isCancelled);
-    //         player1Picked = game.player1Board.value.find((val) => val.isPicked)
-    //         player2Remaining = game.player2Board.value.filter(val => !val.isCancelled);
-    //         player2Picked = game.player2Board.value.find((val) => val.isPicked)
-    //     })
-
-    //     const winProposed = Bool.or(
-    //         player1Remaining.length == 1,
-    //         player2Remaining.length == 1
-    //     )
-
-    //     Provable.asProver(() => {
-    //         if (player1Remaining.length == 1) {
-    //             game.winner = Provable.if(
-    //                 player1Remaining[0].id.equals(player2Picked!.id),
-    //                 game.player1,
-    //                 game.player2
-    //             )
-    //         } else if (player2Remaining.length == 1) {
-    //             game.winner = Provable.if(
-    //                 player2Remaining[0].id.equals(player1Picked!.id),
-    //                 game.player2,
-    //                 game.player1
-    //             )
-    //         }
-    //     })
-
-    //     await this.games.set(gameId, game);
-
-    //     const winnerShare = ProtoUInt64.from(
-    //         Provable.if<ProtoUInt64>(
-    //             winProposed,
-    //             ProtoUInt64,
-    //             ProtoUInt64.from(1),
-    //             ProtoUInt64.from(0),
-    //         ),
-    //     );
-
-    //     await this.acquireFunds(
-    //         gameId,
-    //         game.winner,
-    //         PublicKey.empty(),
-    //         winnerShare,
-    //         ProtoUInt64.from(0),
-    //         ProtoUInt64.from(1),
-    //     );
-
-    //     await this.activeGameId.set(
-    //         Provable.if(winProposed, game.player2, PublicKey.empty()),
-    //         UInt64.from(0),
-    //     );
-    //     await this.activeGameId.set(
-    //         Provable.if(winProposed, game.player1, PublicKey.empty()),
-    //         UInt64.from(0),
-    //     );
+    @runtimeMethod()
+    private async checkWin(gameId: UInt64, game: GameInfo) {
 
 
-    //     await this._onLobbyEnd(gameId, winProposed);
-    // }
+        var player1Remaining: CharacterInfo[] = [], player1Picked, player2Remaining: CharacterInfo[] = [], player2Picked
+
+        Provable.asProver(() => {
+            player1Remaining = game.player1Board.value.filter(val => !val.isCancelled);
+            player1Picked = game.player1Board.value.find((val) => val.isPicked)
+            player2Remaining = game.player2Board.value.filter(val => !val.isCancelled);
+            player2Picked = game.player2Board.value.find((val) => val.isPicked)
+        })
+
+        const winProposed = Bool.or(
+            UInt64.from(player1Remaining.length).equals(UInt64.from(1)),
+            UInt64.from(player2Remaining.length).equals(UInt64.from(1))
+        )
+
+        Provable.asProver(() => {
+            if (UInt64.from(player1Remaining.length).equals(UInt64.from(1)).toBoolean()) {
+                game.winner = Provable.if(
+                    player1Remaining[0].id.equals(player2Picked!.id),
+                    game.player1,
+                    game.player2
+                )
+            } else if (UInt64.from(player2Remaining.length).equals(UInt64.from(1)).toBoolean()) {
+                game.winner = Provable.if(
+                    player2Remaining[0].id.equals(player1Picked!.id),
+                    game.player2,
+                    game.player1
+                )
+            }
+        })
+
+
+        // game.cycles[].phase = UInt64.from(3)
+
+        await this.games.set(gameId, game);
+
+        const winnerShare = ProtoUInt64.from(
+            Provable.if<ProtoUInt64>(
+                winProposed,
+                ProtoUInt64,
+                ProtoUInt64.from(1),
+                ProtoUInt64.from(0),
+            ),
+        );
+
+        await this.acquireFunds(
+            gameId,
+            game.winner,
+            PublicKey.empty(),
+            winnerShare,
+            ProtoUInt64.from(0),
+            ProtoUInt64.from(1),
+        );
+
+        await this.activeGameId.set(
+            Provable.if(winProposed, game.player2, PublicKey.empty()),
+            UInt64.from(0),
+        );
+        await this.activeGameId.set(
+            Provable.if(winProposed, game.player1, PublicKey.empty()),
+            UInt64.from(0),
+        );
+
+
+        await this._onLobbyEnd(gameId, winProposed);
+    }
 }

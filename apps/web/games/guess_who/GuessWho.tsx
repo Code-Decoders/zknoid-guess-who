@@ -17,7 +17,7 @@ import StartPopup from './components/popup/start_popup'
 import EndPopup from './components/popup/end_popup'
 import ReplyPopup from "./components/popup/reply_popup";
 import { character_data, question_key } from './_data/character_data'
-import { Bool, UInt64 } from 'o1js'
+import { Bool, CircuitString, UInt64 } from 'o1js'
 import { CharacterInfo, characters, questions, Trait } from './lib/types'
 import { useNetworkStore } from '@/lib/stores/network'
 import { useToasterStore } from '@/lib/stores/toasterStore'
@@ -27,6 +27,7 @@ import { DEFAULT_PARTICIPATION_FEE } from 'zknoid-chain-dev/dist/src/engine/Lobb
 import { useLobbiesStore, useObserveLobbiesStore } from '@/lib/stores/lobbiesStore'
 import { api } from '@/trpc/react'
 import { useContext, useState } from 'react'
+import { Board } from 'zknoid-chain-dev/dist/src/guess_who/GuessWho'
 
 export const key_question = (question: string): string => {
     const trait = question.split(" ").at(-1)?.replace("?", "")!
@@ -216,7 +217,6 @@ const GuessWho = () => {
         setLoading(false)
     }
 
-    const makeMove = () => { }
 
     const askQuestion = async (index: UInt64) => {
         if (!matchQueue.gameInfo?.isCurrentUserMove) return;
@@ -264,7 +264,46 @@ const GuessWho = () => {
         await tx.send();
 
         setLoading(false)
-     }
+    }
+
+    const makeMove = async (chars: CharacterInfo[]) => {
+        const dummyCharInfo: CharacterInfo = {
+            id: UInt64.from(100),
+            name: CircuitString.fromString("NaN"),
+            traits: [UInt64.from(15), UInt64.from(15), UInt64.from(15), UInt64.from(15), UInt64.from(15), UInt64.from(15)],
+            pos: UInt64.from(0),
+            isPicked: Bool(false),
+            isCancelled: Bool(false)
+        }
+
+        if (!matchQueue.gameInfo?.isCurrentUserMove) return;
+        console.log('After checks');
+
+        const prepBoard: Board = new Board({
+            value: [...Array<CharacterInfo>(24 - chars.length).fill(dummyCharInfo), ...chars]
+        })
+
+        console.log(prepBoard.value.map((val) => (val.id)))
+
+        const guessWhoGame = client.runtime.resolve('GuessWhoGame');
+
+        const tx = await client.transaction(
+            sessionPrivateKey.toPublicKey(),
+            async () => {
+                guessWhoGame.makeMove(
+                    UInt64.from(matchQueue.gameInfo!.gameId),
+                    prepBoard
+                );
+            }
+        );
+
+        setLoading(true);
+
+        tx.transaction = tx.transaction?.sign(sessionPrivateKey);
+        await tx.send();
+
+        setLoading(false)
+    }
 
     return (
         <GamePage
@@ -277,6 +316,7 @@ const GuessWho = () => {
             <button onClick={() => selectCharacter(UInt64.from(1))}>Selectcharacter</button>
             <button onClick={() => askQuestion(UInt64.from(4))}>Askquestion</button>
             <button onClick={() => respond(Bool(true))}>Respond</button>
+            <button onClick={() => makeMove([matchQueue.gameInfo?.player1Board.value[0]!, matchQueue.gameInfo?.player1Board.value[5]!])}>Makemove</button>
             {/* <div className={styles.container}>
                 <div className="flex-1 px-4 py-4"
                     <div className="grid grid-cols-6 gap-2">
