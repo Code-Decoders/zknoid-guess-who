@@ -24,11 +24,10 @@ export interface IGameInfo<I> {
     cycles: I[];
     currentUserIndex: 0 | 1;
     isCurrentUserMove: boolean;
-    currentCycle: I
     opponent: PublicKey;
     gameId: bigint;
     lastMoveBlockHeight: bigint;
-    someRandomValue: bigint;
+    parsed: any;
 }
 
 export interface MatchQueueState {
@@ -155,36 +154,17 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
             const lastMoveBlockHeight = gameInfo.lastMoveBlockHeight;
             console.log('BH', lastMoveBlockHeight);
             set((state) => {
-                // @ts-ignore
-                state.gameInfo = {
-                    player1,
-                    player2,
-                    currentMoveUser: gameInfo.currentMoveUser as PublicKey,
-                    cycles: gameInfo.cycles, // @todo temporal workaround for proto-kit bug https://github.com/ZkNoid/proto-kit,
-                    currentUserIndex,
-                    isCurrentUserMove: (gameInfo.currentMoveUser as PublicKey)
-                        .equals(address)
-                        .toBoolean(),
-                    opponent: currentUserIndex == 1 ? gameInfo.player1 : gameInfo.player2,
-                    gameId: activeGameId.toBigInt(),
-                    lastMoveBlockHeight: lastMoveBlockHeight?.toBigInt(),
-                    winner: gameInfo.winner.equals(PublicKey.empty()).not().toBoolean()
-                        ? gameInfo.winner
-                        : undefined,
-                    someRandomValue: gameInfo.someRandomValue.toBigInt(),
-                    player1Board: gameInfo.player1Board,
-                    player2Board: gameInfo.player2Board,
-                };
                 const parsedGameInfo = {
+                    currentCycle: null,
                     player1: gameInfo.player1.toBase58(),
                     player2: gameInfo.player2.toBase58(),
                     currentMoveUser: gameInfo.currentMoveUser.toBase58(),
                     cycles: gameInfo.cycles.map((cycle: GameCycle) => {
                         return {
-                            question: cycle.question.toBigInt(),
+                            question: Number(cycle.question.toBigInt()),
                             response: cycle.response.toBoolean(),
-                            moves: cycle.moves.map((move: UInt64) => move.toBigInt()),
-                            phase: cycle.phase.toBigInt(),
+                            moves: cycle.moves.map((move: UInt64) => Number(move.toBigInt())),
+                            phase: Number(cycle.phase.toBigInt()),
                         };
                     }),
                     currentUserIndex,
@@ -204,10 +184,10 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
                     player1Board: gameInfo.player1Board.value.map(
                         (character: CharacterInfo) => {
                             return {
-                                id: character.id.toBigInt(),
+                                id: Number(character.id.toBigInt()),
                                 name: character.name.toString(),
                                 traits: character.traits.map((trait: UInt64) =>
-                                    trait.toBigInt()
+                                    Number(trait.toBigInt())
                                 ),
                                 pos: character.pos.toBigInt(),
                                 isPicked: character.isPicked.toBoolean(),
@@ -218,10 +198,10 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
                     player2Board: gameInfo.player2Board.value.map(
                         (character: CharacterInfo) => {
                             return {
-                                id: character.id.toBigInt(),
+                                id: Number(character.id.toBigInt()),
                                 name: character.name.toString(),
                                 traits: character.traits.map((trait: UInt64) =>
-                                    trait.toBigInt()
+                                    Number(trait.toBigInt()),
                                 ),
                                 pos: character.pos.toBigInt(),
                                 isPicked: character.isPicked.toBoolean(),
@@ -230,6 +210,30 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
                         }
                     ),
 
+                };
+
+                parsedGameInfo.currentCycle = parsedGameInfo.cycles.filter((cycle: any) => cycle.phase !== 0 && cycle.phase !== 3).length > 0 ?
+                    parsedGameInfo.cycles.filter((cycle: any) => cycle.phase !== 3).sort((a: any, b: any) => b.phase - a.phase)[0]
+                    : parsedGameInfo.cycles.find((cycle: any) => cycle.phase === 0);
+                // @ts-ignore
+                state.gameInfo = {
+                    player1,
+                    player2,
+                    currentMoveUser: gameInfo.currentMoveUser as PublicKey,
+                    cycles: gameInfo.cycles, // @todo temporal workaround for proto-kit bug https://github.com/ZkNoid/proto-kit,
+                    currentUserIndex,
+                    isCurrentUserMove: (gameInfo.currentMoveUser as PublicKey)
+                        .equals(address)
+                        .toBoolean(),
+                    opponent: currentUserIndex == 1 ? gameInfo.player1 : gameInfo.player2,
+                    gameId: activeGameId.toBigInt(),
+                    lastMoveBlockHeight: lastMoveBlockHeight?.toBigInt(),
+                    winner: gameInfo.winner.equals(PublicKey.empty()).not().toBoolean()
+                        ? gameInfo.winner
+                        : undefined,
+                    player1Board: gameInfo.player1Board,
+                    player2Board: gameInfo.player2Board,
+                    parsed: parsedGameInfo,
                 };
                 console.log('Parsed game info', parsedGameInfo);
             });

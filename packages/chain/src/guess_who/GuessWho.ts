@@ -798,80 +798,85 @@ export class GuessWhoGame extends MatchMaker {
     //   await this.checkWin(gameId, game.value);
   }
 
-  //   @runtimeMethod()
-  //   private async checkWin(gameId: UInt64, game: GameInfo) {
-  //     var player1Remaining: CharacterInfo[] = [],
-  //       player1Picked,
-  //       player2Remaining: CharacterInfo[] = [],
-  //       player2Picked;
+  // @runtimeMethod()
+  // public async declareWinner(gameId: UInt64) {
+    
+  // }
 
-  //     Provable.asProver(() => {
-  //       player1Remaining = game.player1Board.value.filter(
-  //         (val) => !val.isCancelled,
-  //       );
-  //       player1Picked = game.player1Board.value.find((val) => val.isPicked);
-  //       player2Remaining = game.player2Board.value.filter(
-  //         (val) => !val.isCancelled,
-  //       );
-  //       player2Picked = game.player2Board.value.find((val) => val.isPicked);
-  //     });
+    @runtimeMethod()
+    private async checkWin(gameId: UInt64, game: GameInfo) {
+      var player1Remaining: CharacterInfo[] = [],
+        player1Picked,
+        player2Remaining: CharacterInfo[] = [],
+        player2Picked;
 
-  //     const winProposed = Bool.or(
-  //       UInt64.from(player1Remaining.length).equals(UInt64.from(1)),
-  //       UInt64.from(player2Remaining.length).equals(UInt64.from(1)),
-  //     );
+      Provable.asProver(() => {
+        player1Remaining = game.player1Board.value.filter(
+          (val) => !val.isCancelled,
+        );
+        player1Picked = game.player1Board.value.find((val) => val.isPicked);
+        player2Remaining = game.player2Board.value.filter(
+          (val) => !val.isCancelled,
+        );
+        player2Picked = game.player2Board.value.find((val) => val.isPicked);
+      });
 
-  //     Provable.asProver(() => {
-  //       if (
-  //         UInt64.from(player1Remaining.length).equals(UInt64.from(1)).toBoolean()
-  //       ) {
-  //         game.winner = Provable.if(
-  //           player1Remaining[0].id.equals(player2Picked!.id),
-  //           game.player1,
-  //           game.player2,
-  //         );
-  //       } else if (
-  //         UInt64.from(player2Remaining.length).equals(UInt64.from(1)).toBoolean()
-  //       ) {
-  //         game.winner = Provable.if(
-  //           player2Remaining[0].id.equals(player1Picked!.id),
-  //           game.player2,
-  //           game.player1,
-  //         );
-  //       }
-  //     });
+      const winProposed = Bool.or(
+        UInt64.from(player1Remaining.length).equals(UInt64.from(1)),
+        UInt64.from(player2Remaining.length).equals(UInt64.from(1)),
+      );
 
-  //     // game.cycles[].phase = UInt64.from(3)
+      Provable.asProver(() => {
+        if (
+          UInt64.from(player1Remaining.length).equals(UInt64.from(1)).toBoolean()
+        ) {
+          game.winner = Provable.if(
+            player1Remaining[0].id.equals(player2Picked!.id),
+            game.player1,
+            game.player2,
+          );
+        } else if (
+          UInt64.from(player2Remaining.length).equals(UInt64.from(1)).toBoolean()
+        ) {
+          game.winner = Provable.if(
+            player2Remaining[0].id.equals(player1Picked!.id),
+            game.player2,
+            game.player1,
+          );
+        }
+      });
 
-  //     await this.games.set(gameId, game);
+      // game.cycles[].phase = UInt64.from(3)
 
-  //     const winnerShare = ProtoUInt64.from(
-  //       Provable.if<ProtoUInt64>(
-  //         winProposed,
-  //         ProtoUInt64,
-  //         ProtoUInt64.from(1),
-  //         ProtoUInt64.from(0),
-  //       ),
-  //     );
+      await this.games.set(gameId, game);
 
-  //     await this.acquireFunds(
-  //       gameId,
-  //       game.winner,
-  //       PublicKey.empty(),
-  //       winnerShare,
-  //       ProtoUInt64.from(0),
-  //       ProtoUInt64.from(1),
-  //     );
+      const winnerShare = ProtoUInt64.from(
+        Provable.if<ProtoUInt64>(
+          winProposed,
+          ProtoUInt64,
+          ProtoUInt64.from(1),
+          ProtoUInt64.from(0),
+        ),
+      );
 
-  //     await this.activeGameId.set(
-  //       Provable.if(winProposed, game.player2, PublicKey.empty()),
-  //       UInt64.from(0),
-  //     );
-  //     await this.activeGameId.set(
-  //       Provable.if(winProposed, game.player1, PublicKey.empty()),
-  //       UInt64.from(0),
-  //     );
+      await this.acquireFunds(
+        gameId,
+        game.winner,
+        PublicKey.empty(),
+        winnerShare,
+        ProtoUInt64.from(0),
+        ProtoUInt64.from(1),
+      );
 
-  //     await this._onLobbyEnd(gameId, winProposed);
-  //   }
+      await this.activeGameId.set(
+        Provable.if(winProposed, game.player2, PublicKey.empty()),
+        UInt64.from(0),
+      );
+      await this.activeGameId.set(
+        Provable.if(winProposed, game.player1, PublicKey.empty()),
+        UInt64.from(0),
+      );
+
+      await this._onLobbyEnd(gameId, winProposed);
+    }
 }

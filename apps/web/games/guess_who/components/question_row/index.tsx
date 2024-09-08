@@ -7,11 +7,11 @@ interface QuestionRowProps {
   onCheck: (index: number) => void;
   questions: string[];
   status: string;
-  check_pressable: boolean;
 }
 
 const QuestionRow = (props: QuestionRowProps) => {
   const [index, setIndex] = React.useState(0);
+  console.log("QuestionRow", props.status);
   return (
     <div className="flex gap-5 mt-[20px]">
       <Image
@@ -47,7 +47,7 @@ const QuestionRow = (props: QuestionRowProps) => {
         }
       />
       <TickButton
-        check_pressable={props.check_pressable}
+        check_pressable={props.status === "question"}
         onClick={() => {
           props.onCheck(index);
           setIndex((val) => 0);

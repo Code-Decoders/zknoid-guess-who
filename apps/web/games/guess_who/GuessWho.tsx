@@ -48,6 +48,7 @@ enum GameState {
     Active,
     Won,
     Lost,
+    Waiting
 }
 
 interface CharacterData {
@@ -87,7 +88,7 @@ const GuessWho = () => {
         gameId: 'guess-who',
     });
 
-    
+
 
     const client_ = client as ClientAppChain<
         typeof guessWhoConfig.runtimeModules,
@@ -127,15 +128,17 @@ const GuessWho = () => {
         console.log('Collect tx', tx);
 
         tx.transaction = tx.transaction?.sign(sessionPrivateKey);
-
         console.log('Sending tx', tx);
-
         await tx.send();
-
         console.log('Tx sent', tx);
     };
 
     React.useEffect(() => {
+
+        // if (matchQueue.gameInfo?.parsed.currentCycle) {
+        //     setGameState(GameState.Waiting)
+        // }
+
         if (matchQueue.inQueue && !matchQueue.activeGameId) {
             setGameState(GameState.Matchmaking);
         } else if (matchQueue.activeGameId) {
@@ -235,14 +238,19 @@ const GuessWho = () => {
             isPicked: Bool(false),
             isCancelled: Bool(false),
         };
-
+        const finalChars = chars.map((char) => {
+            return {
+                ...char,
+                isCancelled: Bool(true),
+            }
+        });
         if (!matchQueue.gameInfo?.isCurrentUserMove) return;
         console.log('After checks');
 
         const prepBoard: Board = new Board({
             value: [
                 ...Array<CharacterInfo>(24 - chars.length).fill(dummyCharInfo),
-                ...chars,
+                ...finalChars,
             ],
         });
 
@@ -270,16 +278,16 @@ const GuessWho = () => {
 
     const [character, setCharacter] = React.useState<CharacterData | null>();
     const [selectQuestion, setSelectQuestion] = React.useState<string>("");
+    const [givenAnswer, setGivenAnswer] = React.useState<boolean | null>(null);
     const [remainingQuestion, setRemainingQuestion] =
         React.useState<string[]>(questions);
-    const [botRemainingQuestion, setBotRemainingQuestion] =
-        React.useState<string[]>(questions);
+
     const [winner, setWinner] = React.useState<number>(-1);
     const [status, setStatus] = React.useState<string>("overlay");
     const [botCharacter, _] = React.useState<CharacterData | null>(
         character_data[Math.floor(Math.random() * character_data.length)]
     );
-    const [botElimatedCharacters, setBotElimatedCharacters] = React.useState<
+    const [opponentElimatedCharacters, setOpponentElimatedCharacters] = React.useState<
         number[]
     >([]);
 
@@ -288,22 +296,9 @@ const GuessWho = () => {
         number[]
     >([]);
 
-    const [botRemainingCharacters, setBotRemainingCharacters] =
-        React.useState<CharacterData[]>(character_data);
     const [elimateCharacters, setElimateCharacters] = React.useState<number[]>(
         []
     );
-
-    const botQuestions = React.useMemo(() => {
-        let questions = botRemainingCharacters.map((e) =>
-            Object.entries(e)
-                .filter(([key, value]) => value === true)
-                .map(([key, value]) => key_question(key))
-        );
-        const parsed_questions = Array.from(new Set(questions.flat()));
-        console.log("PQue", parsed_questions)
-        return parsed_questions.filter((e) => botRemainingQuestion.includes(e));
-    }, [botRemainingCharacters]);
 
     React.useEffect(() => {
         if (elimateCharacters.length === character_data.length - 1) {
@@ -316,11 +311,56 @@ const GuessWho = () => {
             } else {
                 setWinner(1);
             }
-        } else if (botElimatedCharacters.length === character_data.length - 1) {
+        } else if (opponentElimatedCharacters.length === character_data.length - 1) {
             setStatus("end");
             setWinner(1);
         }
-    }, [elimateCharacters, botElimatedCharacters]);
+    }, [elimateCharacters, opponentElimatedCharacters]);
+
+    React.useEffect(() => {
+        if (matchQueue.gameInfo) {
+            setGameState(matchQueue.gameInfo.isCurrentUserMove ? GameState.Active : GameState.Waiting)
+            setCharacter(character_data[(matchQueue.gameInfo?.player1.toBase58() === networkStore.address ? matchQueue.gameInfo?.parsed?.player1Board.find((e: any) => e.isPicked)?.id : matchQueue.gameInfo?.parsed?.player2Board.find((e: any) => e.isPicked)?.id)])
+
+            setOpponentElimatedCharacters(matchQueue.gameInfo?.player1.toBase58() === networkStore.address ?
+                matchQueue.gameInfo?.parsed?.player2Board.filter((e: any) => e.isCancelled).map((e: any) => e.id) :
+                matchQueue.gameInfo?.parsed?.player1Board.filter((e: any) => e.isCancelled).map((e: any) => e.id)
+            )
+            setElimateCharacters(matchQueue.gameInfo?.player1.toBase58() === networkStore.address ?
+                matchQueue.gameInfo?.parsed?.player1Board.filter((e: any) => e.isCancelled).map((e: any) => e.id) :
+                matchQueue.gameInfo?.parsed?.player2Board.filter((e: any) => e.isCancelled).map((e: any) => e.id)
+            )
+        }
+
+    }, [matchQueue.gameInfo])
+
+    React.useEffect(() => {
+        if (gameState == GameState.Active) {
+            const currentPhase = matchQueue.gameInfo?.parsed.currentCycle.phase;
+
+            switch (currentPhase) {
+                case 0:
+                    setStatus("question");
+                    break;
+                case 1:
+                    setSelectQuestion(questions[matchQueue.gameInfo?.parsed.currentCycle.question]);
+                    setStatus("reply");
+                    break;
+                case 2:
+                    if (givenAnswer === null) {
+                        setStatus("answer");
+                        setSelectQuestion(questions[matchQueue.gameInfo?.parsed.currentCycle.question]);
+                    } else {
+                        setSelectQuestion(questions[matchQueue.gameInfo?.parsed.currentCycle.question]);
+                        setGivenAnswer(matchQueue.gameInfo?.parsed.currentCycle.answer);
+                    }
+                    break;
+                default:
+                    setStatus("question");
+                    break;
+            }
+        }
+    }, [gameState])
 
     return (
         <GamePage
@@ -343,7 +383,6 @@ const GuessWho = () => {
                                 character={character}
                                 onChange={(e) => {
                                     if (status === "selection") {
-                                        selectCharacter(UInt64.from(character.id))
                                         setCharacter(character);
                                     } else if (status === "elimate") {
                                         if (!elimateCharacters.includes(character.id)) {
@@ -361,37 +400,20 @@ const GuessWho = () => {
                     <QuestionRow
                         status={status}
                         questions={remainingQuestion}
-                        check_pressable={
-                            (character != null && status === "selection") ||
-                            (tempElimatedCharacters.length > 0 && status === "elimate")
-                        }
                         onCheck={(index) => {
-                            if (status === "selection") {
-                                if (character) {
-                                    setStatus("question");
-                                } else {
-                                    alert("Please select a character");
-                                }
-                            } else if (status === "question") {
+                            if (status === "question") {
                                 setSelectQuestion(remainingQuestion[index]);
-                                setRemainingQuestion((prev) =>
-                                    prev.filter((_, i) => i !== index)
-                                );
-                                setStatus("answer");
+                                setRemainingQuestion((prev) => prev.filter((e) => e !== remainingQuestion[index]));
+                                askQuestion(UInt64.from(index));
+                                setGameState(GameState.Waiting)
+                                setStatus("elimate");
                             } else if (status === "elimate") {
-                                setElimateCharacters((prev) => {
-                                    return [...prev, ...tempElimatedCharacters];
-                                });
-                                setTempElimatedCharacters([]);
-                                const randomIndex = Math.floor(
-                                    Math.random() * botQuestions.length
-                                );
-                                const question = botQuestions[randomIndex];
-                                setSelectQuestion(botQuestions[randomIndex]);
-                                setBotRemainingQuestion((prev) =>
-                                    prev.filter((e, i) => e !== question)
-                                );
+                                const toMove = tempElimatedCharacters.map((e) => matchQueue.gameInfo?.player1Board.value[e]!);
+                                makeMove(toMove);
+                                setGameState(GameState.Waiting)
                                 setStatus("reply");
+                            } else {
+                                selectCharacter(UInt64.from(character?.id))
                             }
                         }}
                     />
@@ -462,7 +484,7 @@ const GuessWho = () => {
                             <Image
                                 key={index}
                                 src={
-                                    botElimatedCharacters.includes(character.id)
+                                    opponentElimatedCharacters.includes(character.id)
                                         ? "/guess-who/images/character_removed.png"
                                         : "/guess-who/images/character_mini_hidden.png"
                                 }
@@ -474,12 +496,7 @@ const GuessWho = () => {
                         ))}
                     </div>
                 </div>
-                {
-                    gameState === GameState.NotStarted || gameState === GameState.Matchmaking && (
-                        <WaitingPopup />
-                    )
-                }
-                {status === "answer" && (
+                {gameState !== GameState.Waiting && status === "answer" && (
                     <div className="fixed top-0 left-0 right-0 bottom-0 bg-[#00000056] flex items-center justify-center">
                         <div className="absolute border-4 border-[#20d6d7] bg-[#0e6667] rounded-lg px-[20px] py-[30px] w-[500px] flex flex-col items-center justify-center">
                             <div className="text-[20px] font-bold text-center">
@@ -503,42 +520,36 @@ const GuessWho = () => {
                         </div>
                     </div>
                 )}
-                {status === "reply" && (
-                    <ReplyPopup
-                        character={character!}
-                        question={selectQuestion}
-                        onClick={(answer) => {
-                            const newBotRemainingCharacters = botRemainingCharacters.filter(
-                                (e) =>
-                                    answer
-                                        ? e[question_key(selectQuestion)]
-                                        : !e[question_key(selectQuestion)]
-                            );
-                            setBotRemainingCharacters((prev) =>
-                                botRemainingCharacters.filter((e) =>
-                                    answer
-                                        ? !e[question_key(selectQuestion)]
-                                        : e[question_key(selectQuestion)]
-                                )
-                            );
-                            setBotElimatedCharacters((prev) => {
-                                return [...prev, ...newBotRemainingCharacters.map((e) => e.id)];
-                            });
-                            setStatus("question");
-                        }}
-                    />
-                )}
-                {status === "end" && (
-                    <EndPopup
-                        character={winner === 0 ? botCharacter : character!}
-                        winner={winner}
-                    />
-                )}
-                {status === "overlay" && (
-                    <StartPopup onClick={() => setStatus("selection")} />
-                )}
+                {
+                    gameState === GameState.Waiting ?
+                        (<WaitingPopup />) :
+                        (<>
+                            {status === "reply" && (
+                                <ReplyPopup
+                                    character={character!}
+                                    question={selectQuestion}
+                                    onClick={(answer) => {
+                                        respond(Bool(answer))
+                                        setGameState(GameState.Waiting)
+                                        setStatus("question");
+                                    }}
+                                />
+                            )}
+                            {status === "end" && (
+                                <EndPopup
+                                    character={winner === 0 ? botCharacter : character!}
+                                    winner={winner}
+                                />
+                            )}
+                            {status === "overlay" && (
+                                <StartPopup onClick={() => setStatus("selection")} />
+                            )}
+
+                        </>)
+                }
             </div>
         </GamePage>
+
     );
 };
 
